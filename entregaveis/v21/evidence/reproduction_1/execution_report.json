@@ -1,0 +1,173 @@
+{
+  "comparison": {
+    "improved": true,
+    "weights": [
+      0.156571875,
+      0.005900625,
+      0.21094875,
+      0.17445374999999996,
+      0.194625,
+      0.15750000000000003,
+      0.1
+    ],
+    "table": [
+      {
+        "parte": "parte_0",
+        "linhas": 34241,
+        "v20": 0.7703081573769412,
+        "v21": 0.7703993962099541,
+        "delta": 9.123883301287439e-05
+      },
+      {
+        "parte": "parte_1",
+        "linhas": 34241,
+        "v20": 0.7756639749864244,
+        "v21": 0.7756142111892365,
+        "delta": -4.9763797187907244e-05
+      },
+      {
+        "parte": "parte_2",
+        "linhas": 34240,
+        "v20": 0.7786506853635664,
+        "v21": 0.7786825475555861,
+        "delta": 3.1862192019671554e-05
+      },
+      {
+        "parte": "parte_3",
+        "linhas": 34240,
+        "v20": 0.7711585759687531,
+        "v21": 0.7712746338882412,
+        "delta": 0.00011605791948809951
+      },
+      {
+        "parte": "parte_4",
+        "linhas": 34240,
+        "v20": 0.7745424511064779,
+        "v21": 0.7745475200915718,
+        "delta": 5.068985093892309e-06
+      },
+      {
+        "parte": "partes_0_1",
+        "linhas": 68482,
+        "v20": 0.7729849543365539,
+        "v21": 0.773007133965652,
+        "delta": 2.2179629098117992e-05
+      },
+      {
+        "parte": "partes_2_4",
+        "linhas": 102720,
+        "v20": 0.7747163432212283,
+        "v21": 0.7747809092432562,
+        "delta": 6.456602202786765e-05
+      },
+      {
+        "parte": "total",
+        "linhas": 171202,
+        "v20": 0.7740056552208389,
+        "v21": 0.7740567649584406,
+        "delta": 5.110973760169557e-05
+      }
+    ]
+  },
+  "final_sizes": [
+    1646,
+    1793,
+    11,
+    1103,
+    14,
+    11,
+    1089
+  ],
+  "selected_candidate": {
+    "label": "cat_ordered_depth5",
+    "kind": "cat_ordered",
+    "depth": 5
+  },
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0",
+    "joblib": "1.6.0"
+  },
+  "exact_installed_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0",
+    "joblib": "1.6.0"
+  },
+  "csv_sha256": "48334efc455a9a28f395e945fb4c04ee847458f439d8b26984e3965766d6a756",
+  "full_train_seconds": 2139.1408009529114,
+  "full_timings": [
+    {
+      "component": "LightGBM B + EXT auxiliares",
+      "seconds": 181.0781056880951
+    },
+    {
+      "component": "LightGBM B (variáveis da v7)",
+      "seconds": 117.59657001495361
+    },
+    {
+      "component": "Rede neural (MLP, 8 sementes)",
+      "seconds": 210.7025909423828
+    },
+    {
+      "component": "CatBoost + EXT auxiliares",
+      "seconds": 661.2167911529541
+    },
+    {
+      "component": "TabM periódico original",
+      "seconds": 250.82326912879944
+    },
+    {
+      "component": "TabM periódico por pares",
+      "seconds": 199.04524898529053
+    },
+    {
+      "component": "cat_ordered_depth5",
+      "seconds": 518.5067613124847
+    }
+  ],
+  "total_seconds": 2258.1865911483765,
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "threads_per_model": 2,
+  "torch_interop_pool": 2,
+  "threadpools": [
+    {
+      "user_api": "openmp",
+      "internal_api": "openmp",
+      "num_threads": 2,
+      "prefix": "libomp",
+      "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+      "version": null
+    },
+    {
+      "user_api": "openmp",
+      "internal_api": "openmp",
+      "num_threads": 2,
+      "prefix": "libomp",
+      "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+      "version": null
+    }
+  ],
+  "run_cv": false,
+  "cv_only": false
+}

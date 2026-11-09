@@ -1,0 +1,32 @@
+{
+  "original_v17_definitions_preserved": 24,
+  "research_source_sha256": "1991d31189d23da4dcf05efce4b87bbefc7e23057dd4d00e5dda20674416c9d5",
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds": [
+    2,
+    3,
+    4
+  ],
+  "threads_per_model": 2,
+  "cv_workers": 2,
+  "external_training_data": false,
+  "saved_predictions_loaded": false,
+  "features_include_id": false,
+  "declared_on": "2026-10-28",
+  "input_sha256_verified_against_v20": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "target_isolation_assertions_passed_folds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "reference_v20_auc_reproduced_exactly": true,
+  "final_source_sha256": "3c3866074fe4ee9e6f83c036a390dd149e781e85b30eeb188e7580018103d367"
+}
