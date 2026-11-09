@@ -1,0 +1,441 @@
+{
+  "status": "gain_confirmed",
+  "confirmed": true,
+  "csv_sha256": null,
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "configurations": [
+    {
+      "label": "lgb_bins255",
+      "kind": "lgb_resolution",
+      "max_bin": 255
+    },
+    {
+      "label": "lgb_bins1023",
+      "kind": "lgb_resolution",
+      "max_bin": 1023
+    },
+    {
+      "label": "tabm_pair_half",
+      "kind": "tabm_pairwise",
+      "pair_weight": 0.5
+    },
+    {
+      "label": "tabm_pair_full",
+      "kind": "tabm_pairwise",
+      "pair_weight": 1.0
+    }
+  ],
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0"
+  },
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "cv_workers": 2,
+  "threads_per_model": 2,
+  "fold_results": [
+    {
+      "fold": 0,
+      "seconds": 2531.314120054245,
+      "threads": 2,
+      "torch_interop_pool": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    },
+    {
+      "fold": 1,
+      "seconds": 2834.866199016571,
+      "threads": 2,
+      "torch_interop_pool": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "seconds": 1806.8962659835815,
+      "threads": 2,
+      "torch_interop_pool": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    },
+    {
+      "fold": 3,
+      "seconds": 1398.1633241176605,
+      "threads": 2,
+      "torch_interop_pool": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    },
+    {
+      "fold": 4,
+      "seconds": 1383.7841637134552,
+      "threads": 2,
+      "torch_interop_pool": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    }
+  ],
+  "baseline_weights": [
+    0.19875,
+    0.03825,
+    0.22349999999999998,
+    0.2895,
+    0.25
+  ],
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds": [
+    2,
+    3,
+    4
+  ],
+  "seconds": 5643.342908859253,
+  "screening": [
+    {
+      "candidate": null,
+      "weights": [
+        0.23375,
+        0.013249999999999998,
+        0.2835,
+        0.21949999999999995,
+        0.25
+      ],
+      "auc": 0.7727560645864706,
+      "evaluations": 137
+    },
+    {
+      "candidate": 0,
+      "weights": [
+        0.23375,
+        0.013249999999999998,
+        0.2835,
+        0.21949999999999995,
+        0.25,
+        0.0
+      ],
+      "auc": 0.7727560645864706,
+      "evaluations": 183
+    },
+    {
+      "candidate": 1,
+      "weights": [
+        0.23375,
+        0.013249999999999998,
+        0.2835,
+        0.21949999999999995,
+        0.25,
+        0.0
+      ],
+      "auc": 0.7727560645864706,
+      "evaluations": 183
+    },
+    {
+      "candidate": 2,
+      "weights": [
+        0.19400000000000003,
+        0.015600000000000001,
+        0.24379999999999996,
+        0.1966,
+        0.15000000000000002,
+        0.2
+      ],
+      "auc": 0.7729696498178742,
+      "evaluations": 178
+    },
+    {
+      "candidate": 3,
+      "weights": [
+        0.18396875000000001,
+        0.00655625,
+        0.23438749999999997,
+        0.19383749999999997,
+        0.20625,
+        0.17500000000000002
+      ],
+      "auc": 0.7729786710659788,
+      "evaluations": 178
+    }
+  ],
+  "screening_baseline_auc": 0.772720545576815,
+  "chosen_family": 3,
+  "weights": [
+    0.17396875,
+    0.00655625,
+    0.23438749999999997,
+    0.19383749999999997,
+    0.21625,
+    0.17500000000000002
+  ],
+  "selection_auc": 0.7729849543365539,
+  "selected_candidate": {
+    "label": "tabm_pair_full",
+    "kind": "tabm_pairwise",
+    "pair_weight": 1.0
+  },
+  "baseline_iterations": [
+    [
+      728,
+      1077,
+      1247,
+      1750,
+      1607,
+      1621,
+      1241,
+      1707,
+      1957,
+      1372,
+      1478,
+      1348,
+      1356,
+      1394,
+      1589
+    ],
+    [
+      1298,
+      1334,
+      1525,
+      1796,
+      1671,
+      1628,
+      1655,
+      1962,
+      1332,
+      1748,
+      1451,
+      1583,
+      1458,
+      1361,
+      1586
+    ],
+    [
+      9,
+      4,
+      12,
+      10,
+      13,
+      10,
+      7,
+      18,
+      7,
+      12,
+      5,
+      5,
+      12,
+      9,
+      12,
+      11,
+      9,
+      8,
+      10,
+      14,
+      11,
+      9,
+      14,
+      6,
+      9,
+      4,
+      7,
+      13,
+      8,
+      9,
+      8,
+      11,
+      13,
+      13,
+      9,
+      9,
+      10,
+      7,
+      7,
+      17
+    ],
+    [
+      609,
+      1180,
+      946,
+      911,
+      1321,
+      1071,
+      646,
+      890,
+      1170,
+      847
+    ],
+    [
+      9,
+      15,
+      15,
+      8,
+      12
+    ]
+  ],
+  "baseline_sizes": [
+    1646,
+    1793,
+    11,
+    1103,
+    14
+  ],
+  "candidate_iterations": [
+    5,
+    15,
+    10,
+    8,
+    10
+  ],
+  "candidate_size": 11,
+  "table": [
+    {
+      "parte": "parte_0",
+      "linhas": 34241,
+      "v18": 0.7703127779376456,
+      "v20": 0.7703081573769412,
+      "delta": -4.620560704382548e-06
+    },
+    {
+      "parte": "parte_1",
+      "linhas": 34241,
+      "v18": 0.7753556715446908,
+      "v20": 0.7756639749864244,
+      "delta": 0.0003083034417336039
+    },
+    {
+      "parte": "parte_2",
+      "linhas": 34240,
+      "v18": 0.7784429144461983,
+      "v20": 0.7786506853635664,
+      "delta": 0.00020777091736812192
+    },
+    {
+      "parte": "parte_3",
+      "linhas": 34240,
+      "v18": 0.771181139274285,
+      "v20": 0.7711585759687531,
+      "delta": -2.256330553185304e-05
+    },
+    {
+      "parte": "parte_4",
+      "linhas": 34240,
+      "v18": 0.7743850941769155,
+      "v20": 0.7745424511064779,
+      "delta": 0.00015735692956242442
+    },
+    {
+      "parte": "partes_0_1",
+      "linhas": 68482,
+      "v18": 0.772730132807683,
+      "v20": 0.7729849543365539,
+      "delta": 0.0002548215288709077
+    },
+    {
+      "parte": "partes_2_4",
+      "linhas": 102720,
+      "v18": 0.7745862507647795,
+      "v20": 0.7747163432212283,
+      "delta": 0.00013009245644879375
+    },
+    {
+      "parte": "total",
+      "linhas": 171202,
+      "v18": 0.7738218588632437,
+      "v20": 0.7740056552208389,
+      "delta": 0.00018379635759513402
+    }
+  ],
+  "total_seconds_including_prepare": 5736.429371833801,
+  "run_cv": true,
+  "cv_only": true
+}

@@ -1,0 +1,76 @@
+CELL 1 START (0.0s)
+CELL 1 END (1.1s)
+CELL 3 START (1.1s)
+CELL 3 END (369.0s)
+CELL 4 START (369.0s)
+CELL 4 END (369.0s)
+CELL 5 START (369.0s)
+CELL 5 END (369.0s)
+CELL 6 START (369.0s)
+CELL 6 END (369.0s)
+CELL 7 START (369.0s)
+CELL 7 END (369.0s)
+CELL 8 START (369.0s)
+CELL 8 END (369.0s)
+CELL 9 START (369.0s)
+CELL 9 END (369.0s)
+CELL 10 START (369.0s)
+CELL 10 END (369.0s)
+CELL 11 START (369.0s)
+CELL 11 END (369.0s)
+CELL 12 START (369.0s)
+CELL 12 END (369.0s)
+CELL 13 START (369.0s)
+CELL 13 END (369.0s)
+CELL 15 START (369.0s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (369.0s)
+CELL 17 START (369.0s)
+CELL 17 END (369.3s)
+CELL 19 START (369.3s)
+CELL 19 END (369.3s)
+CELL 21 START (369.3s)
+CELL 21 END (369.3s)
+CELL 22 START (369.3s)
+CELL 22 END (369.3s)
+CELL 23 START (369.3s)
+CELL 23 END (369.3s)
+CELL 24 START (369.3s)
+CELL 24 END (369.3s)
+CELL 25 START (369.3s)
+{'base': 74, 'plusx': 142, 'catx': 134} 137s
+Receita fixa: AUCs registradas, não recalculadas nesta reprodução.
+     parte  linhas      v18      v20     delta
+   parte_0   34241 0.770313 0.770308 -0.000005
+   parte_1   34241 0.775356 0.775664  0.000308
+   parte_2   34240 0.778443 0.778651  0.000208
+   parte_3   34240 0.771181 0.771159 -0.000023
+   parte_4   34240 0.774385 0.774542  0.000157
+partes_0_1   68482 0.772730 0.772985  0.000255
+partes_2_4  102720 0.774586 0.774716  0.000130
+     total  171202 0.773822 0.774006  0.000184
+Pesos [0.17396875, 0.00655625, 0.23438749999999997, 0.19383749999999997, 0.21625, 0.17500000000000002] tamanhos [1646, 1793, 11, 1103, 14] 11
+LightGBM B + EXT auxiliares concluído 194 s
+LightGBM B (variáveis da v7) concluído 317 s
+Rede neural (MLP, 8 sementes) concluído 544 s
+CatBoost + EXT auxiliares concluído 1213 s
+    TabM treino completo época 1/14: 17.7s
+    TabM treino completo época 2/14: 15.5s
+    TabM treino completo época 3/14: 16.9s
+    TabM treino completo época 4/14: 16.0s
+    TabM treino completo época 5/14: 16.8s
+    TabM treino completo época 6/14: 18.9s
+    TabM treino completo época 7/14: 17.5s
+    TabM treino completo época 8/14: 19.7s
+    TabM treino completo época 9/14: 19.0s
+    TabM treino completo época 10/14: 17.4s
+    TabM treino completo época 11/14: 17.7s
+    TabM treino completo época 12/14: 18.7s
+    TabM treino completo época 13/14: 18.1s
+    TabM treino completo época 14/14: 16.2s
+CSV /Users/eguchi/GCI/competition/v20_final_2/output/submission.csv SHA-256 59a6a3ca75f9a8eb2deaddc9a3613669182fea7708ebcd271bb5f9308a9d75ce
+CELL 25 END (2172.5s)
+EXECUTION FINISHED reproduction_2

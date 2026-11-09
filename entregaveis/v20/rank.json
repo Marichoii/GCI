@@ -1,0 +1,25 @@
+{
+  "versao": "v20",
+  "score_publico": 0.77877,
+  "rank_publico": 38,
+  "participantes": 2741,
+  "data_relato": "2026-10-26",
+  "fonte": "Resultado informado pelo usuário nesta conversa após a entrega do CSV v20",
+  "notion_url": "https://app.notion.com/p/4044598bf82a81848c12dfe517ba4b3b",
+  "historico": [
+    {
+      "data_relato": "2026-10-26",
+      "score_publico": 0.77877,
+      "rank_publico": 38,
+      "participantes": 2741,
+      "usuario": "eguchoii",
+      "csv_sha256": "59a6a3ca75f9a8eb2deaddc9a3613669182fea7708ebcd271bb5f9308a9d75ce",
+      "fonte": "Resultado informado pelo usuário nesta conversa após a entrega do CSV v20",
+      "descricao": "26/10/2026 — v20: score público 0,77877, posição 38 / 2.741, usuário eguchoii. +0,00012 sobre a v18 desta conversa e +0,00002 sobre a v16; novo melhor público informado."
+    }
+  ],
+  "observacao": "Novo melhor público informado: 0,77877, posição 38 / 2.741. Ganho de +0,00012 sobre a v18 desta conversa e +0,00002 sobre a v16. CSV reproduzido duas vezes do zero.",
+  "situacao": "Pacote com evidências de reprodução",
+  "usuario": "eguchoii",
+  "csv_sha256": "59a6a3ca75f9a8eb2deaddc9a3613669182fea7708ebcd271bb5f9308a9d75ce"
+}

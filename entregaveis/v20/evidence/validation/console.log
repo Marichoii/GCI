@@ -1,0 +1,189 @@
+CELL 1 START (0.0s)
+CELL 1 END (1.1s)
+CELL 3 START (1.1s)
+CELL 3 END (2.9s)
+CELL 4 START (2.9s)
+CELL 4 END (2.9s)
+CELL 5 START (2.9s)
+CELL 5 END (2.9s)
+CELL 6 START (2.9s)
+CELL 6 END (2.9s)
+CELL 7 START (2.9s)
+CELL 7 END (2.9s)
+CELL 8 START (2.9s)
+CELL 8 END (2.9s)
+CELL 9 START (2.9s)
+CELL 9 END (2.9s)
+CELL 10 START (2.9s)
+CELL 10 END (2.9s)
+CELL 11 START (2.9s)
+CELL 11 END (2.9s)
+CELL 12 START (2.9s)
+CELL 12 END (2.9s)
+CELL 13 START (2.9s)
+CELL 13 END (2.9s)
+CELL 15 START (2.9s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (2.9s)
+CELL 17 START (2.9s)
+CELL 17 END (3.1s)
+CELL 19 START (3.1s)
+CELL 19 END (3.1s)
+CELL 21 START (3.1s)
+CELL 21 END (3.1s)
+CELL 22 START (3.1s)
+CELL 22 END (3.1s)
+CELL 23 START (3.1s)
+CELL 23 END (3.1s)
+CELL 24 START (3.1s)
+CELL 24 END (3.1s)
+CELL 25 START (3.1s)
+{'base': 74, 'plusx': 142, 'catx': 134} 92s
+PARTE 0 iniciada, candidatos [0, 1, 2, 3]
+PARTE 1 iniciada, candidatos [0, 1, 2, 3]
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 728
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 1750
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1077
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1247
+BASELINE parte 0: LightGBM B + EXT auxiliares, AUC 0.76792366, 833.4s
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1607
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1298
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1621
+BASELINE parte 1: LightGBM B + EXT auxiliares, AUC 0.77422517, 908.3s
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1334
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1525
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1796
+BASELINE parte 0: LightGBM B (variáveis da v7), AUC 0.76646105, 117.9s
+PASS: alterar todos os TARGET da validação não altera nenhum dos 3 frames usados nos quantis da MLP.
+  MLP estrita parte 0, semente 42: época 9
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1671
+  MLP estrita parte 0, semente 2024: época 4
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1628
+BASELINE parte 1: LightGBM B (variáveis da v7), AUC 0.77140376, 122.1s
+  MLP estrita parte 0, semente 7: época 12
+  MLP estrita parte 1, semente 42: época 7
+  MLP estrita parte 0, semente 11: época 10
+  MLP estrita parte 0, semente 99: época 13
+  MLP estrita parte 1, semente 2024: época 12
+  MLP estrita parte 1, semente 7: época 5
+  MLP estrita parte 0, semente 123: época 10
+  MLP estrita parte 1, semente 11: época 5
+  MLP estrita parte 0, semente 5: época 7
+  MLP estrita parte 1, semente 99: época 12
+  MLP estrita parte 0, semente 77: época 18
+MLP estrita parte 0: AUC 0.76720511
+BASELINE parte 0: Rede neural (MLP, 8 sementes), AUC 0.76720511, 266.5s
+  MLP estrita parte 1, semente 123: época 9
+  MLP estrita parte 1, semente 5: época 12
+  MLP estrita parte 1, semente 77: época 11
+MLP estrita parte 1: AUC 0.77146101
+BASELINE parte 1: Rede neural (MLP, 8 sementes), AUC 0.77146101, 253.6s
+BASELINE parte 0: CatBoost + EXT auxiliares seed 42 concluída, tamanho 609
+BASELINE parte 1: CatBoost + EXT auxiliares seed 42 concluída, tamanho 946
+BASELINE parte 0: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 1180
+BASELINE parte 0: CatBoost + EXT auxiliares, AUC 0.76897199, 573.8s
+BASELINE parte 1: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 911
+BASELINE parte 1: CatBoost + EXT auxiliares, AUC 0.77220419, 594.8s
+BASELINE TabM parte 0: AUC 0.76809630, época 9
+NOVO parte 0: lgb_bins255, AUC 0.76728353, tamanho 792, 41.1s
+NOVO parte 0: lgb_bins1023, AUC 0.76768117, tamanho 790, 45.0s
+BASELINE TabM parte 1: AUC 0.77347002, época 15
+NOVO parte 1: lgb_bins255, AUC 0.77296847, tamanho 1221, 53.0s
+NOVO parte 0: tabm_pair_half, AUC 0.76791326, tamanho 9, 220.9s
+NOVO parte 1: lgb_bins1023, AUC 0.77256144, tamanho 1557, 73.2s
+NOVO parte 0: tabm_pair_full, AUC 0.76800812, tamanho 5, 186.2s
+PARTE 0 concluída, 2531.3s
+NOVO parte 1: tabm_pair_half, AUC 0.77314832, tamanho 15, 278.0s
+NOVO parte 1: tabm_pair_full, AUC 0.77274881, tamanho 15, 208.7s
+PARTE 1 concluída, 2834.9s
+TRIAGEM {"baseline": 0.772720545576815, "candidates": [{"candidate": null, "weights": [0.23375, 0.013249999999999998, 0.2835, 0.21949999999999995, 0.25], "auc": 0.7727560645864706, "evaluations": 137}, {"candidate": 0, "weights": [0.23375, 0.013249999999999998, 0.2835, 0.21949999999999995, 0.25, 0.0], "auc": 0.7727560645864706, "evaluations": 183}, {"candidate": 1, "weights": [0.23375, 0.013249999999999998, 0.2835, 0.21949999999999995, 0.25, 0.0], "auc": 0.7727560645864706, "evaluations": 183}, {"candidate": 2, "weights": [0.19400000000000003, 0.015600000000000001, 0.24379999999999996, 0.1966, 0.15000000000000002, 0.2], "auc": 0.7729696498178742, "evaluations": 178}, {"candidate": 3, "weights": [0.18396875000000001, 0.00655625, 0.23438749999999997, 0.19383749999999997, 0.20625, 0.17500000000000002], "auc": 0.7729786710659788, "evaluations": 178}]}
+PARTE 2 iniciada, candidatos [3]
+PARTE 3 iniciada, candidatos [3]
+BASELINE parte 2: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 1241
+BASELINE parte 3: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 1372
+BASELINE parte 2: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1707
+BASELINE parte 3: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1478
+BASELINE parte 3: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1348
+BASELINE parte 3: LightGBM B + EXT auxiliares, AUC 0.76960001, 155.5s
+BASELINE parte 2: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1957
+BASELINE parte 2: LightGBM B + EXT auxiliares, AUC 0.77734419, 174.5s
+BASELINE parte 3: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1748
+BASELINE parte 2: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1655
+BASELINE parte 3: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1451
+BASELINE parte 2: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1962
+BASELINE parte 3: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1583
+BASELINE parte 3: LightGBM B (variáveis da v7), AUC 0.76857860, 107.5s
+BASELINE parte 2: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1332
+BASELINE parte 2: LightGBM B (variáveis da v7), AUC 0.77463628, 108.3s
+  MLP estrita parte 3, semente 42: época 9
+  MLP estrita parte 3, semente 2024: época 4
+  MLP estrita parte 2, semente 42: época 9
+  MLP estrita parte 3, semente 7: época 7
+  MLP estrita parte 2, semente 2024: época 8
+  MLP estrita parte 2, semente 7: época 10
+  MLP estrita parte 3, semente 11: época 13
+  MLP estrita parte 3, semente 99: época 8
+  MLP estrita parte 2, semente 11: época 14
+  MLP estrita parte 3, semente 123: época 9
+  MLP estrita parte 2, semente 99: época 11
+  MLP estrita parte 3, semente 5: época 8
+  MLP estrita parte 2, semente 123: época 9
+  MLP estrita parte 3, semente 77: época 11
+MLP estrita parte 3: AUC 0.76836407
+BASELINE parte 3: Rede neural (MLP, 8 sementes), AUC 0.76836407, 232.1s
+  MLP estrita parte 2, semente 5: época 14
+  MLP estrita parte 2, semente 77: época 6
+MLP estrita parte 2: AUC 0.77491992
+BASELINE parte 2: Rede neural (MLP, 8 sementes), AUC 0.77491992, 251.4s
+BASELINE parte 3: CatBoost + EXT auxiliares seed 42 concluída, tamanho 646
+BASELINE parte 2: CatBoost + EXT auxiliares seed 42 concluída, tamanho 1321
+BASELINE parte 3: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 890
+BASELINE parte 3: CatBoost + EXT auxiliares, AUC 0.76948026, 503.8s
+BASELINE TabM parte 3: AUC 0.76896947, época 8
+BASELINE parte 2: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 1071
+BASELINE parte 2: CatBoost + EXT auxiliares, AUC 0.77596579, 763.3s
+NOVO parte 3: tabm_pair_full, AUC 0.76895668, tamanho 8, 209.5s
+PARTE 3 concluída, 1398.2s
+PARTE 4 iniciada, candidatos [3]
+BASELINE parte 4: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 1356
+BASELINE parte 4: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1394
+BASELINE parte 4: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1589
+BASELINE parte 4: LightGBM B + EXT auxiliares, AUC 0.77252371, 176.0s
+BASELINE TabM parte 2: AUC 0.77595146, época 15
+BASELINE parte 4: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1458
+BASELINE parte 4: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1361
+BASELINE parte 4: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1586
+BASELINE parte 4: LightGBM B (variáveis da v7), AUC 0.77101100, 111.9s
+  MLP estrita parte 4, semente 42: época 13
+  MLP estrita parte 4, semente 2024: época 13
+NOVO parte 2: tabm_pair_full, AUC 0.77619748, tamanho 10, 207.2s
+PARTE 2 concluída, 1806.9s
+  MLP estrita parte 4, semente 7: época 9
+  MLP estrita parte 4, semente 11: época 9
+  MLP estrita parte 4, semente 99: época 10
+  MLP estrita parte 4, semente 123: época 7
+  MLP estrita parte 4, semente 5: época 7
+  MLP estrita parte 4, semente 77: época 17
+MLP estrita parte 4: AUC 0.77051403
+BASELINE parte 4: Rede neural (MLP, 8 sementes), AUC 0.77051403, 228.9s
+BASELINE parte 4: CatBoost + EXT auxiliares seed 42 concluída, tamanho 1170
+BASELINE parte 4: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 847
+BASELINE parte 4: CatBoost + EXT auxiliares, AUC 0.77205723, 528.2s
+BASELINE TabM parte 4: AUC 0.77329738, época 12
+NOVO parte 4: tabm_pair_full, AUC 0.77254194, tamanho 10, 160.4s
+PARTE 4 concluída, 1383.8s
+     parte  linhas        v18        v20       delta
+   parte_0   34241 0.77031278 0.77030816 -0.00000462
+   parte_1   34241 0.77535567 0.77566397  0.00030830
+   parte_2   34240 0.77844291 0.77865069  0.00020777
+   parte_3   34240 0.77118114 0.77115858 -0.00002256
+   parte_4   34240 0.77438509 0.77454245  0.00015736
+partes_0_1   68482 0.77273013 0.77298495  0.00025482
+partes_2_4  102720 0.77458625 0.77471634  0.00013009
+     total  171202 0.77382186 0.77400566  0.00018380
+Status final: gain_confirmed ; notebook de pesquisa não escreve CSV.
+CELL 25 END (5739.5s)
+EXECUTION FINISHED pesquisa_02

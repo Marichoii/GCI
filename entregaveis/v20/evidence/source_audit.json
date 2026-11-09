@@ -1,0 +1,21 @@
+{
+  "original_v17_definitions_preserved": 24,
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds": [
+    2,
+    3,
+    4
+  ],
+  "threads_per_model": 2,
+  "cv_workers": 2,
+  "external_training_data": false,
+  "predictions_loaded": false,
+  "features_include_id": false,
+  "research_source_sha256": "7e85406366507500992d2d9734e00300d0f4bd7edf4ff05b6c20de1714af184f",
+  "final_source_sha256": "9b9561014f161e204b9552fcbe2a90488b33656579684c890343aeee4fd464c3",
+  "reproduction_evidence": "reproducibility.json",
+  "audit_verified_on": "2026-10-26"
+}
