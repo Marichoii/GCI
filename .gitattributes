@@ -1,0 +1,5 @@
+# Preservar os bytes dos artefatos validados, inclusive as quebras de linha.
+*.ipynb -text
+*.csv -text
+*.zip binary
+*.npz binary
