@@ -1,0 +1,11 @@
+{
+  "data": "2026-10-20",
+  "score_publico": 0.77867,
+  "rank_publico": 23,
+  "participantes": 2314,
+  "csv_sha256_prefix": "5ac79522",
+  "variante": "Outro CSV histórico; não é o CSV 1dfc6313 desta conversa.",
+  "descricao": "20/10: outra submissão chamada v18, score 0.77867, posição 23/2314, SHA iniciado em 5ac79522. Preservar separada do CSV atual 1dfc6313.",
+  "csv_sha256": "5ac795223df3b074c37a0eec5b7967b97536149f90d2e7267f9e95794be40d0f",
+  "notion_url": "https://app.notion.com/p/4044598bf82a8198b955dc9b08081162?pvs=204"
+}

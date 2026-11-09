@@ -1,0 +1,34 @@
+{
+  "versao": "v18",
+  "historico": [
+    {
+      "data": "2026-10-20",
+      "score_publico": 0.77867,
+      "rank_publico": 23,
+      "participantes": 2314,
+      "csv_sha256_prefix": "5ac79522",
+      "variante": "Outro CSV histórico; não é o CSV 1dfc6313 desta conversa.",
+      "descricao": "20/10: outra submissão chamada v18, score 0.77867, posição 23/2314, SHA iniciado em 5ac79522. Preservar separada do CSV atual 1dfc6313.",
+      "csv_sha256": "5ac795223df3b074c37a0eec5b7967b97536149f90d2e7267f9e95794be40d0f",
+      "notion_url": "https://app.notion.com/p/4044598bf82a8198b955dc9b08081162?pvs=204"
+    },
+    {
+      "data": "2026-10-25",
+      "score_publico": 0.77865,
+      "rank_publico": 44,
+      "participantes": 2695,
+      "csv_sha256": "1dfc63131cc4f064621b82f8e1042b620647676f36e2b7d8da3539f1dbc0aada",
+      "descricao": "25/10: v18 desta conversa, score 0.77865, posição 44/2695, CSV local 1dfc6313."
+    }
+  ],
+  "score_publico": 0.77865,
+  "rank_publico": 44,
+  "participantes": 2695,
+  "data_relato": "2026-10-25",
+  "observacao": "Resultado informado pelo usuário nesta conversa. CSV local SHA-256 1dfc63131cc4f064621b82f8e1042b620647676f36e2b7d8da3539f1dbc0aada. Há outra submissão histórica chamada v18 no Notion, score 0.77867, com CSV diferente; manter os registros separados.",
+  "fonte": "Relatos nesta conversa e registros históricos da página Home Credit no Notion",
+  "notion_url": "https://app.notion.com/p/4044598bf82a8173b8d5f38fb4fa1716?pvs=204",
+  "situacao": "Pacote com evidências de reprodução",
+  "fonte_notion": "https://app.notion.com/p/3f84598bf82a8125ad76d12db8bba55a",
+  "csv_sha256": "1dfc63131cc4f064621b82f8e1042b620647676f36e2b7d8da3539f1dbc0aada"
+}

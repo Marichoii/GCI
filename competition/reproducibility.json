@@ -1,0 +1,32 @@
+{
+  "identical_csv_bytes": true,
+  "csv_sha256_run_1": "1dfc63131cc4f064621b82f8e1042b620647676f36e2b7d8da3539f1dbc0aada",
+  "csv_sha256_run_2": "1dfc63131cc4f064621b82f8e1042b620647676f36e2b7d8da3539f1dbc0aada",
+  "notebook_sha256": "f4c5eab6f9ec88ed32c9e81259b7a788b874fb76b21f1e37468d4fef6ca64412",
+  "seconds": [
+    745.1966800689697,
+    886.6467838287354
+  ],
+  "final_train_seconds": [
+    693.8724808692932,
+    820.0597400665283
+  ],
+  "execution_method": "All code cells of the same notebook executed sequentially via execute_notebook.py in two fresh Python processes.",
+  "environment": "Local macOS arm64 CPU, not Colab; no Colab timing was measured.",
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0"
+  }
+}

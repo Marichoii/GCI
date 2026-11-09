@@ -1,0 +1,169 @@
+{
+  "comparison": {
+    "improved": true,
+    "alpha": 0.25,
+    "weights": [
+      0.19875,
+      0.03825,
+      0.22349999999999998,
+      0.2895,
+      0.25
+    ],
+    "table": [
+      {
+        "parte": "parte_0",
+        "linhas": 34241,
+        "v17": 0.7700664859605988,
+        "v18": 0.7703127779376456,
+        "delta": 0.0002462919770468419
+      },
+      {
+        "parte": "parte_1",
+        "linhas": 34241,
+        "v17": 0.774798882331083,
+        "v18": 0.7753556715446908,
+        "delta": 0.0005567892136078001
+      },
+      {
+        "parte": "parte_2",
+        "linhas": 34240,
+        "v17": 0.7781958790093718,
+        "v18": 0.7784429144461983,
+        "delta": 0.00024703543682647044
+      },
+      {
+        "parte": "parte_3",
+        "linhas": 34240,
+        "v17": 0.7711709668212051,
+        "v18": 0.771181139274285,
+        "delta": 1.0172453079881905e-05
+      },
+      {
+        "parte": "parte_4",
+        "linhas": 34240,
+        "v17": 0.7737826435743476,
+        "v18": 0.7743850941769155,
+        "delta": 0.0006024506025679166
+      },
+      {
+        "parte": "partes_0_1",
+        "linhas": 68482,
+        "v17": 0.7724100939756343,
+        "v18": 0.772730132807683,
+        "delta": 0.00032003883204867467
+      },
+      {
+        "parte": "partes_2_4",
+        "linhas": 102720,
+        "v17": 0.7743462383435821,
+        "v18": 0.7745862507647795,
+        "delta": 0.00024001242119742194
+      },
+      {
+        "parte": "total",
+        "linhas": 171202,
+        "v17": 0.7735684461073127,
+        "v18": 0.7738218588632437,
+        "delta": 0.0002534127559310484
+      }
+    ],
+    "validation_recomputed_in_this_run": false
+  },
+  "final_sizes": [
+    1646,
+    1793,
+    11,
+    1103,
+    14
+  ],
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0"
+  },
+  "exact_installed_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0"
+  },
+  "imported_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0"
+  },
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "csv_sha256": "1dfc63131cc4f064621b82f8e1042b620647676f36e2b7d8da3539f1dbc0aada",
+  "full_train_seconds": 693.8724808692932,
+  "total_seconds": 745.1966800689697,
+  "cv_timings": [],
+  "full_timings": [
+    {
+      "component": "LightGBM B + EXT auxiliares",
+      "seconds": 74.52801418304443
+    },
+    {
+      "component": "LightGBM B (variáveis da v7)",
+      "seconds": 49.45454168319702
+    },
+    {
+      "component": "Rede neural (MLP, 8 sementes)",
+      "seconds": 85.65534090995789
+    },
+    {
+      "component": "CatBoost + EXT auxiliares",
+      "seconds": 356.20363092422485
+    },
+    {
+      "component": "TabM periódico",
+      "seconds": 127.86762475967407
+    }
+  ],
+  "best_iterations": [],
+  "tabm_history": null,
+  "component_oof_auc": [],
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "threads_per_model": 2,
+  "torch_interop_pool": 2,
+  "threadpools": [
+    {
+      "user_api": "openmp",
+      "internal_api": "openmp",
+      "num_threads": 2,
+      "prefix": "libomp",
+      "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+      "version": null
+    },
+    {
+      "user_api": "openmp",
+      "internal_api": "openmp",
+      "num_threads": 2,
+      "prefix": "libomp",
+      "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+      "version": null
+    }
+  ],
+  "run_cv": false,
+  "cv_only": false
+}

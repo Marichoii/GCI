@@ -1,0 +1,924 @@
+
+# CELL 0 markdown
+# GCI Home Credit — v18: TabM periódico, treino completo
+
+Usa apenas `input/train.csv` e `input/test.csv`. Todos os modelos, estimadores auxiliares,
+pré-processadores e variáveis supervisionadas são reconstruídos a partir desses arquivos.
+Não lê previsões, OOFs, checkpoints ou modelos de disco. O ID só identifica linhas de saída.
+
+As definições de funções e classes da v17 são mantidas **textualmente idênticas**.
+O TabM mantém `k=8`, 2 blocos, largura 128, dropout 0,15, embeddings periódicos de dimensão 8,
+AdamW (lr 0,002; weight decay 0,01), batch 1024 e early stopping de 7 épocas (máximo 40).
+Como o componente antigo, recebe base (74) + auxiliares EXT (13), agora produzidos pela v17.
+As 10 colunas supervisionadas vêm da `Supervised.add` original, dentro de cada parte.
+
+Protocolo: StratifiedKFold(5, shuffle=True, random_state=42), ordem original do arquivo.
+Peso do TabM escolhido **só nas partes 0–1** em uma grade pré-fixada; conferir partes 2–4 e total.
+CSV novo só é escrito se ambas as AUCs melhorarem. Early stopping usa a respectiva validação,
+como na v17; as partes 2–4 não são um holdout independente de toda a história de experimentos.
+
+Em Colab, coloque `input/` na pasta atual ou defina `GCI_WORKDIR` com a pasta que contém `input/`.
+Reinicie o runtime antes de cada reprodução. A instalação pode exigir reinício se versões
+diferentes já tiverem sido importadas. CPU, 2 threads por biblioteca/modelo.
+
+
+# CELL 1 code
+import os, sys, subprocess, importlib.metadata, random
+from pathlib import Path
+# Definidas antes de importar NumPy/PyTorch/LightGBM.
+for key in ["OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"]:
+    os.environ[key] = "2"
+random.seed(42)
+PINNED = {'numpy': '2.3.5', 'pandas': '2.2.3', 'scipy': '1.17.0', 'scikit-learn': '1.8.0', 'lightgbm': '4.6.0', 'catboost': '1.2.8', 'torch': '2.6.0+cpu', 'tabm': '0.0.3', 'rtdl-num-embeddings': '0.0.12'}
+needed = []
+for name, version in PINNED.items():
+    try:
+        ok = importlib.metadata.version(name) == version
+    except importlib.metadata.PackageNotFoundError:
+        ok = False
+    if not ok:
+        needed.append(f"{name}=={version}")
+if needed:
+    subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", *needed,
+                    "--extra-index-url", "https://download.pytorch.org/whl/cpu"], check=True)
+assert {p: importlib.metadata.version(p) for p in PINNED} == PINNED
+BASE_DIR = Path(os.environ.get("GCI_WORKDIR", Path.cwd())).resolve()
+assert (BASE_DIR / "input/train.csv").is_file(), f"Falta input/train.csv em {BASE_DIR}"
+assert (BASE_DIR / "input/test.csv").is_file(), f"Falta input/test.csv em {BASE_DIR}"
+
+
+# CELL 2 markdown
+## Funções originais da v17
+As células seguintes são cópias exatas das definições, sem alterações.
+
+# CELL 3 code
+import os, time, json, hashlib, warnings
+import numpy as np
+import pandas as pd
+import lightgbm as lgb
+from catboost import CatBoostClassifier
+from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.metrics import roc_auc_score
+from scipy.stats import rankdata
+warnings.filterwarnings("ignore")
+
+SEED = 42
+N_FOLDS = 5
+N_JOBS = 2          # fixo: o resultado não depende do nº de núcleos da máquina
+PRIOR = 0.0807      # taxa média de inadimplência no treino (usada na suavização)
+
+# CELL 4 code
+def make_features(df):
+    df = df.copy()
+    df["DAYS_EMPLOYED_ANOM"] = (df["DAYS_EMPLOYED"] == 365243).astype(int)   # 365243 = código, não valor
+    df.loc[df["DAYS_EMPLOYED"] == 365243, "DAYS_EMPLOYED"] = np.nan
+    df.loc[df["CODE_GENDER"] == "XNA", "CODE_GENDER"] = np.nan
+    df.loc[df["ORGANIZATION_TYPE"] == "XNA", "ORGANIZATION_TYPE"] = np.nan
+    df.loc[df["OWN_CAR_AGE"] >= 60, "OWN_CAR_AGE"] = np.nan
+    df["CREDIT_ANNUITY_RATIO"] = df["AMT_CREDIT"] / df["AMT_ANNUITY"]       # ≈ prazo (mistura prazo e juros)
+    df["ANNUITY_INCOME_RATIO"] = df["AMT_ANNUITY"] / df["AMT_INCOME_TOTAL"]
+    df["CREDIT_INCOME_RATIO"] = df["AMT_CREDIT"] / df["AMT_INCOME_TOTAL"]
+    df["CREDIT_GOODS_RATIO"] = df["AMT_CREDIT"] / df["AMT_GOODS_PRICE"]
+    df["CREDIT_GOODS_DIFF"] = df["AMT_CREDIT"] - df["AMT_GOODS_PRICE"]
+    df["INCOME_PER_PERSON"] = df["AMT_INCOME_TOTAL"] / df["CNT_FAM_MEMBERS"]
+    df["AGE_YEARS"] = -df["DAYS_BIRTH"] / 365.25
+    df["EMPLOYED_AGE_RATIO"] = df["DAYS_EMPLOYED"] / df["DAYS_BIRTH"]
+    df["ID_AGE_RATIO"] = df["DAYS_ID_PUBLISH"] / df["DAYS_BIRTH"]
+    df["PHONE_AGE_RATIO"] = df["DAYS_LAST_PHONE_CHANGE"] / df["DAYS_BIRTH"]
+    df["CAR_AGE_RATIO"] = df["OWN_CAR_AGE"] / df["AGE_YEARS"]
+    return df
+
+# CELL 5 code
+def person_groups(raw):
+    k = pd.DataFrame({"ID": raw["DAYS_BIRTH"] - raw["DAYS_ID_PUBLISH"],
+                      "REG": raw["DAYS_BIRTH"] - raw["DAYS_REGISTRATION"],
+                      "PHONE": raw["DAYS_BIRTH"] - raw["DAYS_LAST_PHONE_CHANGE"],
+                      "G": raw["CODE_GENDER"]})
+    groups = {}
+    for name, cols in {"A": ["ID", "REG", "G"], "B": ["ID", "PHONE", "G"]}.items():
+        g = k.groupby(cols).ngroup().to_numpy().copy()
+        alone = g < 0                                   # faltante → grupo de um pedido só
+        g[alone] = g.max() + 1 + np.arange(alone.sum())
+        groups[name] = g
+    return groups
+
+def person_features(raw, groups):
+    f = pd.DataFrame(index=raw.index)
+    age_days = -raw["DAYS_BIRTH"].values
+    for name, g in groups.items():
+        s = pd.Series(g)
+        f[f"P{name}_CNT"] = s.map(s.value_counts()).values
+        order = pd.DataFrame({"g": g, "d": age_days})
+        f[f"P{name}_RANK"] = order.groupby("g")["d"].rank(method="first").values - 1
+        srt = order.sort_values(["g", "d"])
+        f[f"P{name}_PREV_GAP"] = srt.groupby("g")["d"].diff().reindex(order.index).values
+        f[f"P{name}_NEXT_GAP"] = (-srt.groupby("g")["d"].diff(-1)).reindex(order.index).values
+        for c in ["AMT_CREDIT", "AMT_INCOME_TOTAL", "EXT_SOURCE_2"]:
+            f[f"P{name}_{c}_REL"] = raw[c].values / pd.Series(raw[c].values).groupby(g).transform("mean").values
+    return f
+
+# CELL 6 code
+def tariff_counts(raw):
+    ratio = raw["AMT_CREDIT"] / raw["AMT_ANNUITY"]
+    t = pd.DataFrame(index=raw.index)
+    for d in [1, 2, 3]:
+        k = ratio.round(d)
+        t[f"Q{d}_COUNT"] = k.map(k.value_counts()).values
+    for c in ["AMT_CREDIT", "AMT_ANNUITY", "AMT_GOODS_PRICE", "AMT_INCOME_TOTAL"]:
+        t[c + "_VCOUNT"] = raw[c].map(raw[c].value_counts()).values
+    t["Q_FRAC"] = (ratio * 1000).round() % 1000
+    return t
+
+def _codes(*cols):
+    key = cols[0].astype(str)
+    for c in cols[1:]:
+        key = key + "|" + c.astype(str)
+    return pd.factorize(key)[0]
+
+def tariff_keys(raw):
+    ratio = raw["AMT_CREDIT"] / raw["AMT_ANNUITY"]
+    return {f"Q{d}": ratio.round(d).fillna(-1).values for d in [1, 2, 3, 4]}
+
+# CELL 7 code
+def enhanced_features(raw, base):
+    out = base.copy()
+    ext_cols = ["EXT_SOURCE_1", "EXT_SOURCE_2", "EXT_SOURCE_3"]
+    ext = raw[ext_cols]
+    for agg in ["mean", "min", "max", "std", "median"]:
+        out["EXT_" + agg.upper()] = getattr(ext, agg)(axis=1)
+    out["EXT_N_VALID"] = ext.notna().sum(axis=1)
+    out["EXT_RANGE"] = ext.max(axis=1) - ext.min(axis=1)
+    out["EXT_PRODUCT"] = ext.prod(axis=1, min_count=3)
+    for a, b in [(1, 2), (1, 3), (2, 3)]:
+        x, z = raw[f"EXT_SOURCE_{a}"], raw[f"EXT_SOURCE_{b}"]
+        out[f"EXT_{a}{b}_PRODUCT"] = x * z
+        out[f"EXT_{a}{b}_MEAN"] = (x + z) / 2
+        out[f"EXT_{a}{b}_DIFF"] = x - z
+    out["N_MISSING_RAW"] = raw.isna().sum(axis=1)
+    out["EXT_2_AGE"] = raw["EXT_SOURCE_2"] * (-raw["DAYS_BIRTH"] / 365.25)
+    out["EXT_3_AGE"] = raw["EXT_SOURCE_3"] * (-raw["DAYS_BIRTH"] / 365.25)
+    def ratio(name, num, den):
+        out[name] = num / den.replace(0, np.nan)
+    ratio("ANNUITY_GOODS_RATIO", raw.AMT_ANNUITY, raw.AMT_GOODS_PRICE)
+    ratio("GOODS_INCOME_RATIO", raw.AMT_GOODS_PRICE, raw.AMT_INCOME_TOTAL)
+    ratio("GOODS_CREDIT_RATIO", raw.AMT_GOODS_PRICE, raw.AMT_CREDIT)
+    ratio("INCOME_ANNUITY_RATIO", raw.AMT_INCOME_TOTAL, raw.AMT_ANNUITY)
+    ratio("CREDIT_PER_PERSON", raw.AMT_CREDIT, raw.CNT_FAM_MEMBERS)
+    ratio("ANNUITY_PER_PERSON", raw.AMT_ANNUITY, raw.CNT_FAM_MEMBERS)
+    out["INCOME_AFTER_ANNUITY"] = raw.AMT_INCOME_TOTAL - raw.AMT_ANNUITY
+    ratio("INCOME_AFTER_ANNUITY_PERSON", out.INCOME_AFTER_ANNUITY, raw.CNT_FAM_MEMBERS)
+    out["N_ADULTS"] = raw.CNT_FAM_MEMBERS - raw.CNT_CHILDREN
+    ratio("CHILDREN_FAMILY_RATIO", raw.CNT_CHILDREN, raw.CNT_FAM_MEMBERS)
+    out["AGE_AT_ID"] = raw.DAYS_ID_PUBLISH - raw.DAYS_BIRTH
+    out["AGE_AT_REGISTRATION"] = raw.DAYS_REGISTRATION - raw.DAYS_BIRTH
+    out["AGE_AT_PHONE"] = raw.DAYS_LAST_PHONE_CHANGE - raw.DAYS_BIRTH
+    out["ID_PHONE_GAP"] = raw.DAYS_ID_PUBLISH - raw.DAYS_LAST_PHONE_CHANGE
+    out["REGISTRATION_ID_GAP"] = raw.DAYS_REGISTRATION - raw.DAYS_ID_PUBLISH
+    out["EMPLOYED_PHONE_GAP"] = out.DAYS_EMPLOYED - raw.DAYS_LAST_PHONE_CHANGE
+    ratio("EMPLOYED_PHONE_RATIO", out.DAYS_EMPLOYED, raw.DAYS_LAST_PHONE_CHANGE)
+    for c in ext_cols + ["OWN_CAR_AGE", "AMT_REQ_CREDIT_BUREAU_YEAR"]:
+        out[c + "_MISSING"] = raw[c].isna().astype("int8")
+    out["BUREAU_SUM"] = raw[["AMT_REQ_CREDIT_BUREAU_HOUR", "AMT_REQ_CREDIT_BUREAU_MON", "AMT_REQ_CREDIT_BUREAU_QRT",
+                             "AMT_REQ_CREDIT_BUREAU_YEAR"]].sum(axis=1, min_count=1)
+    for group_cols in [["NAME_INCOME_TYPE"], ["OCCUPATION_TYPE"], ["ORGANIZATION_TYPE"], ["NAME_EDUCATION_TYPE", "CODE_GENDER"]]:
+        key = raw[group_cols].fillna("__NA__").astype(str).agg("|".join, axis=1)
+        tag = "_".join(group_cols)
+        for c in ["AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY"]:
+            med = raw[c].groupby(key).transform("median")
+            out[c + "_GROUP_REL_" + tag] = raw[c] / med.replace(0, np.nan)
+    return out.replace([np.inf, -np.inf], np.nan)
+
+# CELL 8 code
+def ext_aux_features(X_num, raw, seed=SEED):
+    out = pd.DataFrame(index=raw.index)
+    params = dict(objective="regression", learning_rate=0.05, num_leaves=31, min_child_samples=100,
+                  feature_fraction=0.7, bagging_fraction=0.8, bagging_freq=1, n_estimators=400,
+                  deterministic=True, force_row_wise=True, verbose=-1, n_jobs=N_JOBS, random_state=seed)
+    ext_cols = ["EXT_SOURCE_1", "EXT_SOURCE_2", "EXT_SOURCE_3"]
+    drop = [c for c in X_num.columns if c.startswith("EXT_") or "EXT_SOURCE" in c]
+    F = X_num.drop(columns=drop)
+    for c in ext_cols:
+        target = raw[c].values
+        has = ~np.isnan(target)
+        idx = np.where(has)[0]; miss = np.where(~has)[0]
+        pred = np.full(len(raw), np.nan); pred_miss = np.zeros(len(miss))
+        others = [o for o in ext_cols if o != c]
+        Fc = pd.concat([F, raw[others].reset_index(drop=True)], axis=1)
+        for a, b in KFold(5, shuffle=True, random_state=seed).split(idx):
+            m = lgb.LGBMRegressor(**params).fit(Fc.iloc[idx[a]], target[idx[a]])
+            pred[idx[b]] = m.predict(Fc.iloc[idx[b]])
+            if len(miss):
+                pred_miss += m.predict(Fc.iloc[miss]) / 5
+        pred[miss] = pred_miss
+        k = c[-1]
+        out[f"EXT{k}_PRED"] = pred
+        out[f"EXT{k}_FILL"] = np.where(has, target, pred)
+        out[f"EXT{k}_RESID"] = np.where(has, target - pred, np.nan)
+    fills = out[[f"EXT{k}_FILL" for k in "123"]]
+    out["EXTF_MEAN"] = fills.mean(axis=1)
+    out["EXTF_PROD"] = fills.prod(axis=1)
+    out["EXTF_MIN"] = fills.min(axis=1)
+    out["EXTF_W"] = 2 * out["EXT1_FILL"] + out["EXT2_FILL"] + 3 * out["EXT3_FILL"]
+    return out
+
+# CELL 9 code
+def _rate_stats(key, y_all, src):
+    return pd.DataFrame({"k": key[src], "y": y_all[src]}).groupby("k")["y"].agg(["sum", "count"])
+
+def _rates(key, st, dst, ks):
+    kd = pd.Series(key[dst])
+    s = kd.map(st["sum"]).fillna(0).values; c = kd.map(st["count"]).fillna(0).values
+    return [(s + PRIOR * k) / (c + k) for k in ks]
+
+def nested_rates(key, y_all, src, dst, ks=(30,), inner_seed=7):
+    """Taxa de calote suavizada por chave; linhas de dst que estão em src recebem valor fora-da-parte."""
+    out = [np.zeros(len(dst)) for _ in ks]
+    in_src = np.isin(dst, src)
+    if (~in_src).any():
+        st = _rate_stats(key, y_all, src)
+        for o, v in zip(out, _rates(key, st, dst[~in_src], ks)):
+            o[~in_src] = v
+    if in_src.any():
+        d = dst[in_src]; tmp = [np.zeros(len(d)) for _ in ks]
+        for ia, ib in StratifiedKFold(5, shuffle=True, random_state=inner_seed).split(d, y_all[d]):
+            st = _rate_stats(key, y_all, d[ia])
+            for t, v in zip(tmp, _rates(key, st, d[ib], ks)):
+                t[ib] = v
+        for o, t in zip(out, tmp):
+            o[in_src] = t
+    return out
+
+class Supervised:
+    """Acrescenta as colunas que dependem do TARGET para as linhas `dst`, usando só os rótulos de `src`."""
+    def __init__(self, groups, tkeys, y_all):
+        self.groups, self.tkeys, self.y_all = groups, tkeys, y_all
+    def add(self, X_part, src, dst):
+        X = X_part.copy(); y_all = self.y_all
+        for name, g in self.groups.items():
+            st = pd.DataFrame({"g": g[src], "y": y_all[src]}).groupby("g")["y"].agg(["sum", "count"])
+            gs = pd.Series(g[dst])
+            total = gs.map(st["sum"]).fillna(0).values; count = gs.map(st["count"]).fillna(0).values
+            own = np.isin(dst, src); own_y = np.where(own, y_all[dst], 0)
+            total, count = total - own_y, count - own
+            X[f"P{name}_MATE_SUM"] = total
+            X[f"P{name}_MATE_CNT"] = count
+            X[f"P{name}_MATE_MEAN"] = np.where(count > 0, total / np.maximum(count, 1), np.nan)
+        for name, key in self.tkeys.items():
+            X[name + "_TE"] = nested_rates(key, y_all, src, dst, ks=(30,))[0]
+        return X
+
+# CELL 10 code
+LGB_BASE = dict(objective="binary", learning_rate=0.02, bagging_freq=1, deterministic=True,
+                force_row_wise=True, verbose=-1, n_jobs=N_JOBS)
+LGB_PARAMS = {
+    "A": dict(LGB_BASE, num_leaves=35, min_child_samples=28, feature_fraction=0.157, bagging_fraction=0.98,
+              reg_lambda=13.1, reg_alpha=0.92, min_split_gain=0.57, max_bin=127),
+    "B": dict(LGB_BASE, num_leaves=9, min_child_samples=179, feature_fraction=0.44, bagging_fraction=0.74,
+              reg_lambda=1.72, reg_alpha=0.23, min_split_gain=0.088, max_bin=63),
+}
+CAT_PARAMS = dict(learning_rate=0.04, depth=6, l2_leaf_reg=5, verbose=0, allow_writing_files=False,
+                  thread_count=N_JOBS)
+
+def make_model(kind, seed, n_trees=None, cat_cols=None):
+    if kind in LGB_PARAMS:
+        return lgb.LGBMClassifier(**LGB_PARAMS[kind], n_estimators=n_trees or 10000, random_state=seed)
+    if kind == "cat":
+        extra = dict(iterations=n_trees) if n_trees else dict(iterations=4000, eval_metric="AUC", od_type="Iter", od_wait=200)
+        return CatBoostClassifier(**CAT_PARAMS, **extra, cat_features=cat_cols, random_seed=seed)
+    raise ValueError(kind)
+
+def fit_with_es(model, kind, Xtr, ytr, Xva, yva):
+    if kind == "cat":
+        model.fit(Xtr, ytr, eval_set=(Xva, yva), use_best_model=True)
+        return model, model.get_best_iteration() + 1
+    model.fit(Xtr, ytr, eval_set=[(Xva, yva)], eval_metric="auc", callbacks=[lgb.early_stopping(200, verbose=False)])
+    return model, model.best_iteration_
+
+def to_rank(p):
+    return (rankdata(p) - 0.5) / len(p)
+
+# CELL 11 code
+def prepare(train, test, verbose=True):
+    t0 = time.time()
+    y = train["TARGET"].to_numpy(); n = len(train)
+    raw = pd.concat([train.drop(columns="TARGET"), test], ignore_index=True)
+    full = make_features(raw).drop(columns="SK_ID_CURR")          # o ID é só o número da linha: não entra
+    cat_cols = full.select_dtypes(exclude="number").columns.tolist()
+    groups = person_groups(raw)
+    person = person_features(raw, groups)
+    tariff = tariff_counts(raw)
+    full_lgb = full.copy()
+    for c in cat_cols:
+        full_lgb[c + "_COUNT"] = full_lgb[c].map(full_lgb[c].value_counts())
+        full_lgb[c] = full_lgb[c].astype("category").cat.codes
+    full_lgb = pd.concat([full_lgb, person, tariff], axis=1)
+    full_cat = full.copy()
+    for c in cat_cols:
+        full_cat[c] = full_cat[c].fillna("NA").astype(str)
+    full_cat = pd.concat([full_cat, person, tariff], axis=1)
+    plus = enhanced_features(raw, full_lgb)
+    plus_cat = enhanced_features(raw, full_cat)
+    ext = ext_aux_features(full_lgb, raw)
+    sets = {"base": full_lgb,                                  # variáveis da v7
+            "plusx": pd.concat([plus, ext], axis=1),           # + ampliadas + estimativas das EXT_SOURCE
+            "catx": pd.concat([plus_cat, ext], axis=1)}        # idem, com as categorias em texto (CatBoost)
+    y_all = np.concatenate([y, np.zeros(len(test))])
+    ctx = dict(y=y, n=n, raw=raw, cat_cols=cat_cols, ids=test["SK_ID_CURR"].to_numpy(),
+               sup=Supervised(groups, tariff_keys(raw), y_all),
+               X={k: v.iloc[:n].reset_index(drop=True) for k, v in sets.items()},
+               Xt={k: v.iloc[n:].reset_index(drop=True) for k, v in sets.items()})
+    if verbose:
+        print({k: v.shape[1] for k, v in sets.items()}, f"{time.time()-t0:.0f}s")
+    return ctx
+
+# CELL 12 code
+def run_cv(ctx, fset, kind, seeds=(42,), fold_seed=SEED, log=print):
+    """Mesmas 5 partes para todos os componentes (fold_seed); `seeds` = sementes do modelo, cuja média é feita."""
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    oof = np.zeros(n); pte = np.zeros(len(Xt)); its = []
+    folds = list(StratifiedKFold(N_FOLDS, shuffle=True, random_state=fold_seed).split(X, y))
+    t0 = time.time()
+    for f, (a, b) in enumerate(folds):
+        Xa = sup.add(X.iloc[a], a, a); Xb = sup.add(X.iloc[b], a, b)
+        for s in seeds:
+            m = make_model(kind, s, cat_cols=ctx["cat_cols"])
+            m, it = fit_with_es(m, kind, Xa, y[a], Xb, y[b]); its.append(it)
+            oof[b] += m.predict_proba(Xb)[:, 1] / len(seeds)
+            pte += m.predict_proba(Xt_sup)[:, 1] / (len(seeds) * N_FOLDS)
+        log(f"  {fset}/{kind} fold {f}: AUC {roc_auc_score(y[b], oof[b]):.5f} ({time.time()-t0:.0f}s)")
+    fold_id = np.zeros(n, int)
+    for f, (a, b) in enumerate(folds):
+        fold_id[b] = f
+    return dict(oof=oof, test=pte, its=its, fold_id=fold_id, auc=roc_auc_score(y, oof))
+
+def fit_full(ctx, fset, kind, n_trees, seeds=(42,)):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xall = sup.add(X, idx_tr, idx_tr); Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    p = np.zeros(len(Xt))
+    for s in seeds:
+        p += make_model(kind, s, n_trees=n_trees, cat_cols=ctx["cat_cols"]).fit(Xall, y).predict_proba(Xt_sup)[:, 1] / len(seeds)
+    return p
+
+# CELL 13 code
+def nn_available():
+    try:
+        import torch  # noqa
+        return True
+    except ImportError:
+        return False
+
+def nn_inputs(X_all_num, cat_codes, n_quantiles=1000):
+    """Prepara a matriz numérica (quantis → normal, faltante → 0 + indicador). Sem TARGET."""
+    from sklearn.preprocessing import QuantileTransformer
+    Xn = X_all_num.replace([np.inf, -np.inf], np.nan)
+    miss_cols = [c for c in Xn.columns if Xn[c].isna().mean() > 0.01]
+    qt = QuantileTransformer(n_quantiles=n_quantiles, output_distribution="normal", subsample=10**9, random_state=0)
+    Z = qt.fit_transform(Xn.to_numpy(dtype=np.float64))
+    Z = np.nan_to_num(Z, nan=0.0).astype(np.float32)
+    M = Xn[miss_cols].isna().to_numpy(np.float32)
+    return np.hstack([Z, M]), cat_codes.astype(np.int64)
+
+NN_PARAMS = dict(lr=5e-4, wd=1e-4, drop1=0.5, drop2=0.4, bs=1024, h1=512, h2=256)   # escolhidos na validação
+
+def train_nn(Xn_tr, Xc_tr, y_tr, Xn_va, Xc_va, y_va, Xn_te_list, Xc_te_list, seed, cat_card,
+             epochs=50, patience=6, n_epochs_fixed=None, log=None, hp=None):
+    hp = dict(NN_PARAMS, **(hp or {}))
+    import torch, torch.nn as nn
+    torch.manual_seed(seed); np.random.seed(seed)
+    torch.set_num_threads(N_JOBS); torch.use_deterministic_algorithms(True)
+    d_num = Xn_tr.shape[1]
+
+    class Net(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.embs = nn.ModuleList([nn.Embedding(c + 2, min(16, (c + 2) // 2 + 1)) for c in cat_card])
+            d_emb = sum(e.embedding_dim for e in self.embs)
+            d_in = d_num + d_emb
+            h1, h2 = hp["h1"], hp["h2"]
+            self.mlp = nn.Sequential(nn.Linear(d_in, h1), nn.BatchNorm1d(h1), nn.ReLU(), nn.Dropout(hp["drop1"]),
+                                     nn.Linear(h1, h2), nn.BatchNorm1d(h2), nn.ReLU(), nn.Dropout(hp["drop2"]),
+                                     nn.Linear(h2, 1))
+        def forward(self, xn, xc):
+            e = [emb(xc[:, i] + 1) for i, emb in enumerate(self.embs)]
+            return self.mlp(torch.cat([xn] + e, 1)).squeeze(1)
+
+    net = Net(); opt = torch.optim.AdamW(net.parameters(), lr=hp["lr"], weight_decay=hp["wd"])
+    lossf = nn.BCEWithLogitsLoss()
+    tn = lambda a: torch.from_numpy(a)
+    Xn_t, Xc_t, y_t = tn(Xn_tr), tn(Xc_tr), tn(y_tr.astype(np.float32))
+    def predict(xn, xc):
+        net.eval(); out = []
+        with torch.no_grad():
+            for i in range(0, len(xn), 8192):
+                out.append(torch.sigmoid(net(tn(xn[i:i+8192]), tn(xc[i:i+8192]))).numpy())
+        return np.concatenate(out)
+    g = torch.Generator().manual_seed(seed)
+    best, best_state, bad, best_ep = -1, None, 0, 0
+    n_ep = n_epochs_fixed or epochs
+    for ep in range(n_ep):
+        net.train()
+        perm = torch.randperm(len(Xn_t), generator=g)
+        for i in range(0, len(perm), hp["bs"]):
+            b = perm[i:i+hp["bs"]]
+            opt.zero_grad(); loss = lossf(net(Xn_t[b], Xc_t[b]), y_t[b]); loss.backward(); opt.step()
+        if n_epochs_fixed is None:
+            auc = roc_auc_score(y_va, predict(Xn_va, Xc_va))
+            if log: log(f"    época {ep+1}: AUC {auc:.5f}")
+            if auc > best:
+                best, bad, best_ep = auc, 0, ep + 1
+                best_state = {k: v.clone() for k, v in net.state_dict().items()}
+            else:
+                bad += 1
+                if bad >= patience:
+                    break
+    if best_state is not None:
+        net.load_state_dict(best_state)
+    pva = predict(Xn_va, Xc_va) if Xn_va is not None else None
+    ptes = [predict(a, b) for a, b in zip(Xn_te_list, Xc_te_list)]
+    return pva, ptes, best_ep
+
+def _nn_split(ctx, Xs):
+    cats = ctx["cat_cols"]
+    num = [X.drop(columns=cats) for X in Xs]
+    lens = [len(x) for x in num]
+    Zall, Call = nn_inputs(pd.concat(num, ignore_index=True), pd.concat([X[cats] for X in Xs], ignore_index=True).to_numpy())
+    out, s = [], 0
+    for L in lens:
+        out.append((Zall[s:s+L], Call[s:s+L])); s += L
+    return out
+
+def run_cv_nn(ctx, fset, seeds=(42,), fold_seed=SEED, log=print, hp=None, epochs=50, patience=6):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    card = [int(max(X[c].max(), Xt[c].max())) + 1 for c in ctx["cat_cols"]]
+    oof = np.zeros(n); pte = np.zeros(len(Xt)); its = []; t0 = time.time()
+    folds = list(StratifiedKFold(N_FOLDS, shuffle=True, random_state=fold_seed).split(X, y))
+    for f, (a, b) in enumerate(folds):
+        Xa = sup.add(X.iloc[a], a, a); Xb = sup.add(X.iloc[b], a, b)
+        (Za, Ca), (Zb, Cb), (Zt, Ct) = _nn_split(ctx, [Xa, Xb, Xt_sup])
+        for s in seeds:
+            pva, (pt,), ep = train_nn(Za, Ca, y[a], Zb, Cb, y[b], [Zt], [Ct], s, card, hp=hp,
+                                      epochs=epochs, patience=patience)
+            oof[b] += pva / len(seeds); pte += pt / (len(seeds) * N_FOLDS); its.append(ep)
+        log(f"  NN {fset} fold {f}: AUC {roc_auc_score(y[b], oof[b]):.5f} épocas {its[-len(seeds):]} ({time.time()-t0:.0f}s)")
+    return dict(oof=oof, test=pte, its=its, auc=roc_auc_score(y, oof))
+
+def fit_full_nn(ctx, fset, n_epochs, seeds=(42,), hp=None):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xall = sup.add(X, idx_tr, idx_tr); Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    card = [int(max(X[c].max(), Xt[c].max())) + 1 for c in ctx["cat_cols"]]
+    (Za, Ca), (Zt, Ct) = _nn_split(ctx, [Xall, Xt_sup])
+    p = np.zeros(len(Xt))
+    for s in seeds:
+        _, (pt,), _ = train_nn(Za, Ca, y, None, None, None, [Zt], [Ct], s, card, n_epochs_fixed=n_epochs, hp=hp)
+        p += pt / len(seeds)
+    return p
+
+# CELL 14 markdown
+Os campos `cv`, `weight` e `size` na lista original abaixo são o registro histórico da v17. As AUCs medidas, os pesos escolhidos e os tamanhos efetivamente usados pela v18 são calculados ou fixados nas células seguintes.
+
+# CELL 15 code
+COMPONENTS = [{'label': 'LightGBM B + EXT auxiliares',
+  'fset': 'plusx',
+  'kind': 'B',
+  'seeds': [42, 2024, 7],
+  'size': 1646,
+  'hp': None,
+  'cv': 0.77231,
+  'weight': 0.265},
+ {'label': 'LightGBM B (variáveis da v7)',
+  'fset': 'base',
+  'kind': 'B',
+  'seeds': [42, 2024, 7],
+  'size': 1793,
+  'hp': None,
+  'cv': 0.77041,
+  'weight': 0.051},
+ {'label': 'Rede neural (MLP, 8 sementes)',
+  'fset': 'plusx',
+  'kind': 'nn',
+  'seeds': [42, 2024, 7, 11, 99, 123, 5, 77],
+  'size': 10,
+  'hp': {'lr': 0.0005, 'wd': 0.0001, 'drop1': 0.5, 'drop2': 0.4, 'bs': 1024, 'h1': 512, 'h2': 256},
+  'cv': 0.77039,
+  'weight': 0.298},
+ {'label': 'CatBoost + EXT auxiliares',
+  'fset': 'catx',
+  'kind': 'cat',
+  'seeds': [42, 2024],
+  'size': 1094,
+  'hp': None,
+  'cv': 0.77206,
+  'weight': 0.386}]
+
+for c in COMPONENTS:
+    print(f"{c['label']:28s} peso {c['weight']:.3f}  sementes {c['seeds']}  tamanho {c['size']}")
+
+# CELL 16 markdown
+## Novo componente: TabM periódico
+Quantis ajustados apenas em Xa; categorias e auxiliares são as da v17. Não usa pricing.
+
+# CELL 17 code
+"""TabM periódico da v16, com variáveis e Supervised da v17.
+
+As funções da v17 não são redefinidas ou modificadas.
+"""
+import gc
+import torch
+from torch import nn
+from sklearn.preprocessing import QuantileTransformer
+from tabm import TabM
+import rtdl_num_embeddings as num_embeddings
+
+# Pool inter-op da máquina onde esta validação foi realizada. No modo eager
+# usado aqui não há tarefas inter-op paralelas; os operadores usam N_JOBS=2.
+# Fixá-lo também evita que a configuração dependa do nº de CPUs do Colab.
+TORCH_INTEROP_THREADS = 9
+if torch.get_num_interop_threads() != TORCH_INTEROP_THREADS:
+    torch.set_num_interop_threads(TORCH_INTEROP_THREADS)
+
+TABM_CONFIG = dict(k=8, n_blocks=2, d_block=128, dropout=0.15, arch_type="tabm")
+TABM_AUX_COLS = [f"EXT{k}_{suffix}" for k in "123" for suffix in ["PRED", "FILL", "RESID"]]
+TABM_AUX_COLS += ["EXTF_MEAN", "EXTF_PROD", "EXTF_MIN", "EXTF_W"]
+
+
+def add_tabm_feature_set(ctx):
+    # A v16 usava core=True: base (74 colunas) + 13 auxiliares.
+    # Aqui todas as colunas vêm da prepare() original, sem recalcular features.
+    for key in ["X", "Xt"]:
+        ctx[key]["tabm_periodic"] = pd.concat(
+            [ctx[key]["base"], ctx[key]["plusx"][TABM_AUX_COLS]], axis=1)
+        assert "SK_ID_CURR" not in ctx[key]["tabm_periodic"]
+
+
+def periodic_preprocess(ctx, A, others):
+    cats = ctx["cat_cols"]
+    nums = [c for c in A if c not in cats and A[c].nunique(dropna=True) > 1]
+    qt = QuantileTransformer(n_quantiles=256, output_distribution="normal",
+                             subsample=100000, random_state=42)
+    values = A[nums].replace([np.inf, -np.inf], np.nan).to_numpy(dtype=np.float32)
+    z = qt.fit_transform(values)
+    keep = np.array([np.unique(v[np.isfinite(v)]).size > 1 for v in z.T])
+    missing = [c for c in nums if A[c].isna().any()]
+    # Cardinalidades sem TARGET; esquema categórico idêntico em todas as partes.
+    X, Xt = ctx["X"]["tabm_periodic"], ctx["Xt"]["tabm_periodic"]
+    cards = [int(max(X[c].max(), Xt[c].max(), 0)) + 2 for c in cats]
+    cards += [2] * len(missing)
+
+    def transform(frame):
+        values = frame[nums].replace([np.inf, -np.inf], np.nan).to_numpy(dtype=np.float32)
+        zn = np.nan_to_num(qt.transform(values), nan=0, posinf=4, neginf=-4)
+        zn = zn.clip(-4, 4)[:, keep].astype(np.float32)
+        zc = (frame[cats].to_numpy(dtype=np.int64) + 1).clip(min=0)
+        if missing:
+            zc = np.column_stack([zc, frame[missing].isna().to_numpy(dtype=np.int64)])
+        return torch.from_numpy(zn), torch.from_numpy(zc)
+
+    return transform(A), [transform(x) for x in others], cards
+
+
+def periodic_model(n_num, cards):
+    emb = num_embeddings.PeriodicEmbeddings(
+        n_num, d_embedding=8, frequency_init_scale=0.1, lite=True)
+    return TabM.make(n_num_features=n_num, num_embeddings=emb,
+                     cat_cardinalities=cards, d_out=1, **TABM_CONFIG)
+
+
+def periodic_predict(model, data):
+    model.eval()
+    pred = []
+    with torch.no_grad():
+        for start in range(0, len(data[0]), 2048):
+            logits = model(data[0][start:start + 2048], data[1][start:start + 2048]).squeeze(-1)
+            pred.append(logits.sigmoid().mean(dim=1).numpy())
+    return np.concatenate(pred)
+
+
+def train_periodic(pair, target, valid, y_valid, cards, seed, n_epochs_fixed=None, log=print):
+    torch.set_num_threads(N_JOBS)
+    torch.use_deterministic_algorithms(True)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    model = periodic_model(pair[0].shape[1], cards)
+    opt = torch.optim.AdamW(model.parameters(), lr=0.002, weight_decay=0.01)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        opt, mode="max", factor=0.5, patience=2, min_lr=1e-5)
+    target = torch.tensor(target, dtype=torch.float32)
+    best, best_ep, stale, state = -np.inf, 0, 0, None
+    history = []
+    for ep in range(1, (n_epochs_fixed or 40) + 1):
+        ts = time.time()
+        lr = float(opt.param_groups[0]["lr"])
+        model.train()
+        for ids in torch.randperm(len(target)).split(1024):
+            opt.zero_grad(set_to_none=True)
+            logits = model(pair[0][ids], pair[1][ids]).squeeze(-1)
+            loss = nn.functional.binary_cross_entropy_with_logits(
+                logits, target[ids, None].expand_as(logits))
+            loss.backward()
+            opt.step()
+        if n_epochs_fixed is None:
+            auc = float(roc_auc_score(y_valid, periodic_predict(model, valid)))
+            scheduler.step(auc)
+            history.append(dict(epoch=ep, auc=auc, lr=lr, seconds=time.time() - ts))
+            if auc > best + 1e-6:
+                best, best_ep, stale = auc, ep, 0
+                state = {k: v.detach().clone() for k, v in model.state_dict().items()}
+            else:
+                stale += 1
+            log(f"    TabM época {ep}: AUC {auc:.7f}, melhor {best_ep}, {time.time()-ts:.1f}s")
+            if stale >= 7:
+                break
+        else:
+            # Sem validação no treino completo: LR constante, como os outros
+            # componentes da v17; não consultar TARGET de validação/teste.
+            log(f"    TabM treino completo época {ep}/{n_epochs_fixed}: {time.time()-ts:.1f}s")
+    if state is not None:
+        model.load_state_dict(state)
+    return model, best_ep, history
+
+
+def run_cv_periodic(ctx, log=print):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X = ctx["X"]["tabm_periodic"]
+    oof = np.zeros(n)
+    its, histories = [], []
+    splits = list(StratifiedKFold(n_splits=5, shuffle=True, random_state=42).split(X, y))
+    fold_id = np.empty(n, dtype=np.int8)
+    for fold, (a, b) in enumerate(splits):
+        fold_id[b] = fold
+        assert not np.intersect1d(a, b).size
+        Xa = sup.add(X.iloc[a], a, a)
+        Xb = sup.add(X.iloc[b], a, b)
+        pair, (valid,), cards = periodic_preprocess(ctx, Xa, [Xb])
+        del Xa, Xb
+        # Uma semente por parte, igual a experiment_v13.py: 42+100*fold.
+        model, ep, history = train_periodic(pair, y[a], valid, y[b], cards, 42 + 100 * fold, log=log)
+        oof[b] = periodic_predict(model, valid)
+        its.append(ep)
+        histories.append(history)
+        log(f"TabM periódico parte {fold}: AUC {roc_auc_score(y[b], oof[b]):.7f}; época {ep}")
+        del model, pair, valid
+        gc.collect()
+    return dict(oof=oof, its=its, histories=histories, fold_id=fold_id,
+                auc=float(roc_auc_score(y, oof)))
+
+
+def fit_full_periodic(ctx, n_epochs, log=print):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    a = np.arange(n)
+    b = np.arange(n, n + len(ctx["Xt"]["tabm_periodic"]))
+    Xa = sup.add(ctx["X"]["tabm_periodic"], a, a)
+    Xt = sup.add(ctx["Xt"]["tabm_periodic"], a, b)
+    pair, (test_pair,), cards = periodic_preprocess(ctx, Xa, [Xt])
+    model, _, _ = train_periodic(pair, y, None, None, cards, 42,
+                                 n_epochs_fixed=int(n_epochs), log=log)
+    result = periodic_predict(model, test_pair)
+    del model, pair, test_pair
+    gc.collect()
+    return result
+
+
+# CELL 18 markdown
+## Chamada de CV da MLP com TARGET isolado
+As funções originais continuam intactas. Esta nova chamada reutiliza `Supervised.add`, `_nn_split` e `train_nn`, mas prepara também o teste com os rótulos do treino da parte. Assim, os quantis conjuntos não recebem colunas que dependam dos rótulos da validação. A mesma correção é aplicada à referência v17 e à candidata v18.
+
+# CELL 19 code
+"""CV com isolamento completo do TARGET, sem editar funções da v17."""
+def run_cv_nn_strict(ctx, fset, seeds=(42,), hp=None, folds_to_run=None, log=print):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_te = np.arange(n, n + len(Xt))
+    cards = [int(max(X[c].max(), Xt[c].max())) + 1 for c in ctx["cat_cols"]]
+    splits = list(StratifiedKFold(n_splits=5, shuffle=True, random_state=42).split(X, y))
+    oof = np.zeros(n)
+    its, per_fold = [], []
+    for fold, (a, b) in enumerate(splits):
+        if folds_to_run is not None and fold not in folds_to_run:
+            continue
+        Xa = sup.add(X.iloc[a], a, a)
+        Xb = sup.add(X.iloc[b], a, b)
+        # Diferença da chamada original: o teste entra nos quantis, então
+        # suas colunas supervisionadas também precisam excluir y[b].
+        Xt_fold = sup.add(Xt, a, idx_te)
+        if fold == 0:
+            changed = sup.y_all.copy()
+            changed[b] = 1 - changed[b]
+            check_sup = Supervised(sup.groups, sup.tkeys, changed)
+            pd.testing.assert_frame_equal(Xa, check_sup.add(X.iloc[a], a, a))
+            pd.testing.assert_frame_equal(Xb, check_sup.add(X.iloc[b], a, b))
+            pd.testing.assert_frame_equal(Xt_fold, check_sup.add(Xt, a, idx_te))
+            log("PASS: alterar todos os TARGET da validação não altera nenhum dos 3 frames usados nos quantis da MLP.")
+        (Za, Ca), (Zb, Cb), _ = _nn_split(ctx, [Xa, Xb, Xt_fold])
+        fold_its = []
+        for seed in seeds:
+            # As previsões de teste da CV não são necessárias para escolher
+            # pesos ou avaliar OOF. O treino final usa fit_full_nn original.
+            pva, _, ep = train_nn(Za, Ca, y[a], Zb, Cb, y[b], [], [], seed, cards, hp=hp)
+            oof[b] += pva / len(seeds)
+            its.append(ep)
+            fold_its.append(ep)
+            log(f"  MLP estrita parte {fold}, semente {seed}: época {ep}")
+        auc = float(roc_auc_score(y[b], oof[b]))
+        per_fold.append(dict(fold=fold, auc=auc, its=fold_its))
+        log(f"MLP estrita parte {fold}: AUC {auc:.8f}")
+    return dict(oof=oof, its=its, per_fold=per_fold,
+                auc=float(roc_auc_score(y, oof)) if folds_to_run is None else None)
+
+
+# CELL 20 markdown
+## Regra de seleção dos pesos
+Grade única: TabM de 0% a 50%, de 2,5% em 2,5%; proporções da v17 preservadas. Empates favorecem o menor peso.
+
+# CELL 21 code
+"""Seleção pré-especificada: uma dimensão, 21 pesos; só TARGET das partes 0–1."""
+ALPHA_GRID = np.round(np.arange(0.0, 0.50001, 0.025), 3)
+V17_WEIGHTS = np.array([0.265, 0.051, 0.298, 0.386], dtype=float)
+
+
+def select_periodic_weight(y_select, oofs_select):
+    # A função sequer recebe rótulos ou previsões das partes 2–4.
+    ranks = np.column_stack([to_rank(p) ** 2 for p in oofs_select])
+    baseline = sum(w * ranks[:, i] for i, w in enumerate(V17_WEIGHTS))
+    scores = []
+    for alpha in ALPHA_GRID:
+        p = (1 - alpha) * baseline + alpha * ranks[:, 4]
+        scores.append(dict(alpha=float(alpha), auc=float(roc_auc_score(y_select, p))))
+    # empates favorecem o peso menor; grade em ordem crescente.
+    best = max(scores, key=lambda r: r["auc"])
+    return best["alpha"], scores
+
+
+def compare_v17_v18(y, oofs):
+    splits = list(StratifiedKFold(n_splits=5, shuffle=True, random_state=42).split(np.zeros(len(y)), y))
+    fold_id = np.empty(len(y), dtype=np.int8)
+    for fold, (_, b) in enumerate(splits):
+        fold_id[b] = fold
+    selection = fold_id < 2
+    alpha, search = select_periodic_weight(y[selection], [p[selection] for p in oofs])
+    weights = np.r_[(1 - alpha) * V17_WEIGHTS, alpha]
+    # Mesma transformação global de percentis ao quadrado da v17.
+    ranks = np.column_stack([to_rank(p) ** 2 for p in oofs])
+    v17 = sum(w * ranks[:, i] for i, w in enumerate(V17_WEIGHTS))
+    v18 = (sum(w * ranks[:, i] for i, w in enumerate(weights))
+           if alpha > 0 else v17.copy())
+    rows = []
+    masks = [(f"parte_{i}", fold_id == i) for i in range(5)]
+    masks += [("partes_0_1", selection), ("partes_2_4", ~selection), ("total", np.ones(len(y), bool))]
+    for label, mask in masks:
+        a = float(roc_auc_score(y[mask], v17[mask]))
+        b = float(roc_auc_score(y[mask], v18[mask]))
+        rows.append(dict(parte=label, linhas=int(mask.sum()), v17=a, v18=b, delta=b - a))
+    by_name = {r["parte"]: r for r in rows}
+    improved = by_name["partes_2_4"]["delta"] > 0 and by_name["total"]["delta"] > 0
+    return dict(alpha=alpha, weights=weights.tolist(), search=search,
+                table=rows, improved=bool(improved),
+                selection_note="Pesos escolhidos só nas partes 0–1, com rankings restritos a essas partes. "
+                "Confirmação e tabela usam rankings globais, como a v17. Não houve ajuste após a confirmação.")
+
+
+# CELL 22 code
+# Evita usar módulos antigos já importados antes da instalação no Colab.
+import scipy, sklearn, catboost
+LOADED_VERSIONS = {"numpy": np.__version__, "pandas": pd.__version__,
+                   "scipy": scipy.__version__, "scikit-learn": sklearn.__version__,
+                   "lightgbm": lgb.__version__, "catboost": catboost.__version__,
+                   "torch": str(torch.__version__)}
+assert all(PINNED[k] == v for k, v in LOADED_VERSIONS.items()), (
+    "Versões carregadas diferem das instaladas. Reinicie o runtime e execute tudo novamente.", LOADED_VERSIONS)
+
+
+# CELL 23 markdown
+## Dados e configuração
+`RUN_CV=True` refaz toda a validação; `False` só permite reproduzir uma receita já aprovada. Nenhum artefato treinado é lido em nenhum dos modos.
+
+# CELL 24 code
+RUN_CV = False
+FROZEN_RECIPE = {'weights': [0.192125, 0.036974999999999994, 0.21605, 0.27985, 0.275], 'sizes': [1646, 1793, 11, 1094, 15], 'improved': True, 'metrics': [{'parte': 'parte_0', 'linhas': 34241, 'v17': 0.7699877870075076, 'v18': 0.770385546021773, 'delta': 0.0003977590142654197}, {'parte': 'parte_1', 'linhas': 34241, 'v17': 0.7752904305286589, 'v18': 0.7761566147473191, 'delta': 0.0008661842186602486}, {'parte': 'parte_2', 'linhas': 34240, 'v17': 0.7780853383525711, 'v18': 0.7782512470392988, 'delta': 0.00016590868672772263}, {'parte': 'parte_3', 'linhas': 34240, 'v17': 0.7712094037512603, 'v18': 0.771501968099555, 'delta': 0.00029256434829461053}, {'parte': 'parte_4', 'linhas': 34240, 'v17': 0.7741174379707949, 'v18': 0.7748107394989481, 'delta': 0.0006933015281531674}, {'parte': 'partes_0_1', 'linhas': 68482, 'v17': 0.772610920174288, 'v18': 0.7730885808963919, 'delta': 0.00047766072210386756}, {'parte': 'partes_2_4', 'linhas': 102720, 'v17': 0.7744308976743737, 'v18': 0.7747567916533054, 'delta': 0.0003258939789316795}, {'parte': 'total', 'linhas': 171202, 'v17': 0.7737038759702474, 'v18': 0.7740830039139679, 'delta': 0.0003791279437205253}], 'alpha': 0.275, 'input_sha256': {'train.csv': 'b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1', 'test.csv': 'dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65'}}
+notebook_started = time.time()
+train = pd.read_csv(BASE_DIR / "input/train.csv")
+test = pd.read_csv(BASE_DIR / "input/test.csv")
+assert train.shape == (171202, 34) and test.shape == (61500, 33)
+assert train.TARGET.isin([0, 1]).all()
+assert train.SK_ID_CURR.is_unique and test.SK_ID_CURR.is_unique
+input_hashes = {name: hashlib.sha256((BASE_DIR / "input" / name).read_bytes()).hexdigest()
+                for name in ["train.csv", "test.csv"]}
+if not RUN_CV:
+    assert FROZEN_RECIPE["input_sha256"] == input_hashes, "Dados diferentes dos validados: use RUN_CV=True."
+ctx = prepare(train, test)
+add_tabm_feature_set(ctx)
+print("Versões:", PINNED)
+print("Hashes dos dados:", input_hashes)
+
+
+# CELL 25 markdown
+## Validação e decisão
+Todas as OOFs desta célula existem somente na memória da execução atual.
+
+# CELL 26 code
+cv_results = []
+if RUN_CV:
+    for c in COMPONENTS:
+        if c["kind"] == "nn":
+            r = run_cv_nn_strict(ctx, c["fset"], seeds=tuple(c["seeds"]), hp=c["hp"])
+        else:
+            r = run_cv(ctx, c["fset"], c["kind"], seeds=tuple(c["seeds"]))
+        r.pop("test", None)
+        cv_results.append(r)
+    cv_results.append(run_cv_periodic(ctx))
+    comparison = compare_v17_v18(ctx["y"], [r["oof"] for r in cv_results])
+    weights = comparison["weights"]
+    sizes = [max(1, round(float(np.mean(r["its"])) * 1.15)) for r in cv_results]
+    approved = comparison["improved"]
+    print(pd.DataFrame(comparison["table"]).to_string(index=False, float_format=lambda x: f"{x:.8f}"))
+    print("Busca nas partes 0–1:", comparison["search"])
+    print("Pesos:", weights, "tamanhos finais:", sizes)
+else:
+    assert FROZEN_RECIPE and FROZEN_RECIPE["improved"], "Validação completa necessária antes de gerar CSV."
+    approved = True
+    weights, sizes = FROZEN_RECIPE["weights"], FROZEN_RECIPE["sizes"]
+    comparison = {"improved": True, "alpha": FROZEN_RECIPE["alpha"],
+                  "weights": weights, "table": FROZEN_RECIPE["metrics"],
+                  "validation_recomputed_in_this_run": False}
+    print("Reproduzindo receita fixa aprovada; AUCs abaixo são do experimento registrado, não recalculadas nesta execução.")
+    print(pd.DataFrame(comparison["table"]).to_string(index=False))
+    print("Pesos efetivos v18:", weights, "tamanhos finais:", sizes)
+if not approved:
+    print("SEM GANHO confirmado nas partes 2–4 e total. Nenhum CSV novo será gerado.")
+
+
+# CELL 27 markdown
+## Treino final e arquivo de submissão
+100% do treino. Tamanho = média das melhores épocas/iterações × 1,15, arredondada para o inteiro mais próximo. TabM: semente 42, taxa de aprendizado constante no treino sem validação.
+
+# CELL 28 code
+output_dir = BASE_DIR / "output"
+output_dir.mkdir(exist_ok=True)
+output_file = output_dir / "submission.csv"
+csv_sha256 = None
+full_train_seconds = None
+if approved:
+    full_started = time.time()
+    preds = []
+    for c, size in zip(COMPONENTS, sizes[:4]):
+        if c["kind"] == "nn":
+            p = fit_full_nn(ctx, c["fset"], size, seeds=tuple(c["seeds"]), hp=c["hp"])
+        else:
+            p = fit_full(ctx, c["fset"], c["kind"], size, seeds=tuple(c["seeds"]))
+        preds.append(p)
+        print(c["label"], "concluído", round(time.time() - full_started), "s")
+    preds.append(fit_full_periodic(ctx, sizes[4]))
+    pred = sum(w * to_rank(p) ** 2 for w, p in zip(weights, preds))
+    submission = pd.DataFrame({"SK_ID_CURR": test.SK_ID_CURR.to_numpy(), "TARGET": pred})
+    assert list(submission.columns) == ["SK_ID_CURR", "TARGET"]
+    assert len(submission) == 61500 and np.isfinite(pred).all()
+    assert submission.TARGET.between(0, 1).all()
+    submission.to_csv(output_file, index=False, float_format="%.17g", lineterminator="\n")
+    csv_sha256 = hashlib.sha256(output_file.read_bytes()).hexdigest()
+    full_train_seconds = time.time() - full_started
+    print("CSV:", output_file, "SHA-256:", csv_sha256)
+else:
+    print("Não foi escrito nem substituído output/submission.csv.")
+execution_report = dict(comparison=comparison, final_sizes=sizes, versions=PINNED,
+                        imported_versions=LOADED_VERSIONS,
+                        input_sha256=input_hashes, csv_sha256=csv_sha256,
+                        full_train_seconds=full_train_seconds,
+                        total_seconds=time.time() - notebook_started,
+                        threads_per_model=N_JOBS, torch_interop_pool=TORCH_INTEROP_THREADS,
+                        run_cv=RUN_CV)
+(output_dir / "execution_report.json").write_text(json.dumps(execution_report, indent=2, ensure_ascii=False))
+print("Tempo total desta execução:", round(execution_report["total_seconds"]), "s")
+
+
+# CELL 29 markdown
+## Proveniência e limites
+
+- Funções e hiperparâmetros dos 4 componentes: notebook v17 anexado pela autora.
+- TabM: arquitetura periódica de `experiment_v13.py`, fornecido no pacote v16; adaptações apenas à API/contexto da v17, a 2 threads e ao treino final completo. Fontes do método: [TabM](https://github.com/yandex-research/tabm) e [rtdl-num-embeddings](https://github.com/yandex-research/rtdl-num-embeddings).
+- A função `run_cv_nn` original continua disponível e intacta, mas a CV usa `run_cv_nn_strict` para preparar também o teste com os rótulos do treino da parte. `_nn_split` continua transdutivo em covariáveis (treino/validação/teste), sem acesso aos rótulos da validação em nenhum dos frames. O TabM ajusta quantis só no treino da parte. A referência v17 e a candidata v18 recebem a mesma correção na chamada de CV da MLP; por isso os números podem diferir do resultado histórico.
+- Os estimadores auxiliares EXT não usam TARGET; como na v17, usam covariáveis de treino e teste.
+- A validação antiga da v16 e seu resultado público não são reaproveitados como evidência desta v18.
+- Resultados públicos/private futuros não são garantidos por um ganho local de AUC.
+- Implementação assistida por ChatGPT. Registrar o link desta conversa na entrega conforme as instruções do curso.
+
+
+# CELL 30 markdown
+## Créditos preservados da v17
+
+## Referências e créditos
+- Material da GCI World 2026: `README.ipynb` (regras) e `tutorial.ipynb` (estrutura, *count encoding*, `OWN_CAR_AGE`, células de submissão).
+- Competição original: [Home Credit Default Risk (Kaggle, 2018)](https://www.kaggle.com/c/home-credit-default-risk). As razões de crédito e o tratamento de `DAYS_EMPLOYED = 365243` são ideias comuns nos notebooks públicos dela.
+- Ideias desenvolvidas neste projeto a partir da análise dos dados: grupos de pedidos da mesma pessoa ("datas fixas"), "tarifas" (razão exata crédito ÷ prestação) e taxas de calote calculadas fora-da-parte.
+- Variáveis ampliadas (seção 2.4) e a ideia de estimar as `EXT_SOURCE` com modelos auxiliares (seção 2.5): vieram de uma revisão feita com o ChatGPT; aqui foram reimplementadas e validadas.
+- *Target encoding* fora-da-parte: técnica clássica, ver [scikit-learn — TargetEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html).
+- Documentação: [LightGBM](https://lightgbm.readthedocs.io/) · [CatBoost](https://catboost.ai/docs/) · [PyTorch](https://pytorch.org/docs/) · [scikit-learn](https://scikit-learn.org/).
+- Código desenvolvido com auxílio de IA generativa (Claude, da Anthropic; e ChatGPT nas versões 8 a 16). Os links das conversas são enviados junto, conforme pedido pelo curso.

@@ -1,0 +1,39 @@
+{
+  "original_definitions_preserved": 24,
+  "folds": [
+    {
+      "fold": 0,
+      "train": 136961,
+      "valid": 34241,
+      "target_isolation": true
+    },
+    {
+      "fold": 1,
+      "train": 136961,
+      "valid": 34241,
+      "target_isolation": true
+    },
+    {
+      "fold": 2,
+      "train": 136962,
+      "valid": 34240,
+      "target_isolation": true
+    },
+    {
+      "fold": 3,
+      "train": 136962,
+      "valid": 34240,
+      "target_isolation": true
+    },
+    {
+      "fold": 4,
+      "train": 136962,
+      "valid": 34240,
+      "target_isolation": true
+    }
+  ],
+  "inputs": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  }
+}
