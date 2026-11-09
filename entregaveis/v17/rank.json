@@ -1,0 +1,29 @@
+{
+  "versao": "v17",
+  "historico": [
+    {
+      "data": "2026-10-17",
+      "score_publico": 0.77826,
+      "rank_publico": 28,
+      "participantes": null,
+      "descricao": "17/10: score 0.77826, posição 28, conforme registro histórico do Notion."
+    },
+    {
+      "data": "2026-10-19",
+      "score_publico": 0.77826,
+      "rank_publico": 32,
+      "participantes": 2240,
+      "descricao": "19/10: mesma submissão, posição 32 de 2240, conforme registro histórico do Notion."
+    }
+  ],
+  "score_publico": 0.77826,
+  "rank_publico": 32,
+  "participantes": 2240,
+  "data_relato": "2026-10-19",
+  "observacao": "Último rank histórico encontrado no Notion. Antes: posição 28, informada em 17/10. Notebook original preservado; sem novo treino nesta organização.",
+  "fonte": "Relatos nesta conversa e registros históricos da página Home Credit no Notion",
+  "notion_url": "https://app.notion.com/p/4044598bf82a81849b3bf7a505564803?pvs=204",
+  "situacao": "Arquivos históricos",
+  "fonte_notion": "https://app.notion.com/p/3f84598bf82a8125ad76d12db8bba55a",
+  "csv_sha256": "bc62b6095b5a17d949133006277273ee9106ad9f2044376c1bf68763235befba"
+}
