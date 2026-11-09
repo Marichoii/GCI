@@ -1,0 +1,338 @@
+{
+  "status": "rejected_in_feature_probe",
+  "confirmed": false,
+  "csv_sha256": null,
+  "probe_baseline_auc": 0.7704999653558215,
+  "candidates": [
+    {
+      "configuration": {
+        "label": "density_pooled",
+        "by_contract": false
+      },
+      "auc_0_1": 0.7704493027159872,
+      "delta_0_1": -5.066263983433128e-05,
+      "deltas_by_fold": [
+        0.00038677081517757284,
+        -0.000453240070163341
+      ],
+      "mean_fold_delta": -3.3234627492884083e-05
+    },
+    {
+      "configuration": {
+        "label": "density_by_contract",
+        "by_contract": true
+      },
+      "auc_0_1": 0.7701716723690579,
+      "delta_0_1": -0.00032829298676362306,
+      "deltas_by_fold": [
+        0.0009044000473180658,
+        -0.0014184463170308081
+      ],
+      "mean_fold_delta": -0.0002570231348563712
+    }
+  ],
+  "chosen": null,
+  "folds": [
+    {
+      "fold": 0,
+      "details": [
+        {
+          "label": "reference_lgb_B_seed42",
+          "auc": 0.7670376624431677,
+          "iteration": 728,
+          "density": null
+        },
+        {
+          "label": "density_pooled",
+          "auc": 0.7674244332583453,
+          "iteration": 784,
+          "density": {
+            "by_contract": false,
+            "pooled": {
+              "observations": 136961,
+              "bandwidth": 0.032790410023616615,
+              "peaks_log": [
+                2.3056488693250348,
+                2.5373267304443394,
+                2.7046085087605145,
+                2.9969815283839183,
+                3.1539007186628085,
+                3.2471640109983753,
+                3.4255485622116417,
+                3.531394997163912
+              ],
+              "bounds_log": [
+                2.1194923770838043,
+                2.439622328949936,
+                2.5987620738082446,
+                2.783808288759766,
+                3.0998672238969642,
+                3.2027529194100097,
+                3.3626328491281243,
+                3.468479284080394,
+                3.6353909699666667
+              ]
+            },
+            "groups": {}
+          }
+        },
+        {
+          "label": "density_by_contract",
+          "auc": 0.7679420624904858,
+          "iteration": 1132,
+          "density": {
+            "by_contract": true,
+            "pooled": {
+              "observations": 136961,
+              "bandwidth": 0.032790410023616615,
+              "peaks_log": [
+                2.3056488693250348,
+                2.5373267304443394,
+                2.7046085087605145,
+                2.9969815283839183,
+                3.1539007186628085,
+                3.2471640109983753,
+                3.4255485622116417,
+                3.531394997163912
+              ],
+              "bounds_log": [
+                2.1194923770838043,
+                2.439622328949936,
+                2.5987620738082446,
+                2.783808288759766,
+                3.0998672238969642,
+                3.2027529194100097,
+                3.3626328491281243,
+                3.468479284080394,
+                3.6353909699666667
+              ]
+            },
+            "groups": {
+              "Cash loans": {
+                "observations": 123996,
+                "bandwidth": 0.03514991733583174,
+                "peaks_log": [
+                  2.300855192699375,
+                  2.5385245591669134,
+                  2.7043748335866296,
+                  3.01016127704798,
+                  3.1552802671652307,
+                  3.2478306435155186,
+                  3.4270081721296757,
+                  3.5321453996636025
+                ],
+                "bounds_log": [
+                  2.11908625354741,
+                  2.4385701527086034,
+                  2.6021992180959117,
+                  2.7865595677856847,
+                  3.0990096383442562,
+                  3.204146865878183,
+                  3.3603719011574684,
+                  3.4662495317021973,
+                  3.6354316196705234
+                ]
+              },
+              "Revolving loans": {
+                "observations": 12965,
+                "bandwidth": 0.00020440985565084446,
+                "peaks_log": [
+                  2.9956300686261654
+                ],
+                "bounds_log": [
+                  2.5771008891807345,
+                  2.995732273553991
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "seconds": 111.58643198013306,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    },
+    {
+      "fold": 1,
+      "details": [
+        {
+          "label": "reference_lgb_B_seed42",
+          "auc": 0.7738736387918164,
+          "iteration": 1750,
+          "density": null
+        },
+        {
+          "label": "density_pooled",
+          "auc": 0.773420398721653,
+          "iteration": 1790,
+          "density": {
+            "by_contract": false,
+            "pooled": {
+              "observations": 136961,
+              "bandwidth": 0.032817874411706374,
+              "peaks_log": [
+                2.3048524834294692,
+                2.5372775817506144,
+                2.7045644359562795,
+                2.9969463271564463,
+                3.153870278889194,
+                3.2471364011454495,
+                3.42626657246302,
+                3.531376011831181
+              ],
+              "bounds_log": [
+                2.119430549896199,
+                2.4395702155773944,
+                2.5987147892686244,
+                2.7837666191421473,
+                3.099835144566125,
+                3.203464169295298,
+                3.362608742986528,
+                3.4691985969936776,
+                3.6353751402201016
+              ]
+            },
+            "groups": {}
+          }
+        },
+        {
+          "label": "density_by_contract",
+          "auc": 0.7724551924747856,
+          "iteration": 891,
+          "density": {
+            "by_contract": true,
+            "pooled": {
+              "observations": 136961,
+              "bandwidth": 0.032817874411706374,
+              "peaks_log": [
+                2.3048524834294692,
+                2.5372775817506144,
+                2.7045644359562795,
+                2.9969463271564463,
+                3.153870278889194,
+                3.2471364011454495,
+                3.42626657246302,
+                3.531376011831181
+              ],
+              "bounds_log": [
+                2.119430549896199,
+                2.4395702155773944,
+                2.5987147892686244,
+                2.7837666191421473,
+                3.099835144566125,
+                3.203464169295298,
+                3.362608742986528,
+                3.4691985969936776,
+                3.6353751402201016
+              ]
+            },
+            "groups": {
+              "Cash loans": {
+                "observations": 124067,
+                "bandwidth": 0.03516435007128327,
+                "peaks_log": [
+                  2.299847210874812,
+                  2.5383047446771063,
+                  2.7041882464526155,
+                  3.009295401503998,
+                  3.1544434655575686,
+                  3.247752935306292,
+                  3.426966361331619,
+                  3.532124652635736
+                ],
+                "bounds_log": [
+                  2.118782406481455,
+                  2.4383303128034735,
+                  2.601992160537346,
+                  2.7871299973403696,
+                  3.0989021145166618,
+                  3.2048009571679907,
+                  3.3603167400825305,
+                  3.4662155827338603,
+                  3.6354315655718237
+                ]
+              },
+              "Revolving loans": {
+                "observations": 12894,
+                "bandwidth": 0.00020440985565084446,
+                "peaks_log": [
+                  2.9956300686261654
+                ],
+                "bounds_log": [
+                  2.5771008891807345,
+                  2.995732273553991
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "seconds": 153.36880898475647,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ]
+    }
+  ],
+  "seconds": 157.99366927146912,
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds_executed": [],
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0",
+    "joblib": "1.6.0"
+  },
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "limitation": "Only a matched single-seed LightGBM feature ablation, not validation of the v20/v21 ensemble. Inherited v17 preprocessing still uses unlabeled train+test; density itself is fitted on outer training rows only.",
+  "seconds_including_prepare": 251.23074507713318,
+  "run_cv": true,
+  "cv_only": true
+}

@@ -1,0 +1,55 @@
+CELL 1 START (0.0s)
+CELL 1 END (1.2s)
+CELL 3 START (1.2s)
+CELL 3 END (3.4s)
+CELL 4 START (3.4s)
+CELL 4 END (3.4s)
+CELL 5 START (3.4s)
+CELL 5 END (3.4s)
+CELL 6 START (3.4s)
+CELL 6 END (3.4s)
+CELL 7 START (3.4s)
+CELL 7 END (3.4s)
+CELL 8 START (3.4s)
+CELL 8 END (3.4s)
+CELL 9 START (3.4s)
+CELL 9 END (3.4s)
+CELL 10 START (3.4s)
+CELL 10 END (3.4s)
+CELL 11 START (3.4s)
+CELL 11 END (3.4s)
+CELL 12 START (3.4s)
+CELL 12 END (3.4s)
+CELL 13 START (3.4s)
+CELL 13 END (3.4s)
+CELL 15 START (3.4s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (3.4s)
+CELL 17 START (3.4s)
+CELL 17 END (3.7s)
+CELL 19 START (3.7s)
+CELL 19 END (3.7s)
+CELL 21 START (3.7s)
+CELL 21 END (3.7s)
+CELL 22 START (3.7s)
+CELL 22 END (3.7s)
+CELL 23 START (3.7s)
+CELL 23 END (3.7s)
+CELL 24 START (3.7s)
+CELL 24 END (3.7s)
+CELL 25 START (3.7s)
+CELL 25 END (4.7s)
+CELL 26 START (4.7s)
+{'base': 74, 'plusx': 142, 'catx': 134} 93s
+PROBE parte 0: reference_lgb_B_seed42, AUC 0.76703766, 728 árvores
+PROBE parte 1: reference_lgb_B_seed42, AUC 0.77387364, 1750 árvores
+PROBE parte 0: density_pooled, AUC 0.76742443, 784 árvores
+PROBE parte 0: density_by_contract, AUC 0.76794206, 1132 árvores
+PROBE parte 1: density_pooled, AUC 0.77342040, 1790 árvores
+PROBE parte 1: density_by_contract, AUC 0.77245519, 891 árvores
+{"status": "rejected_in_feature_probe", "baseline": 0.7704999653558215, "candidates": [{"configuration": {"label": "density_pooled", "by_contract": false}, "auc_0_1": 0.7704493027159872, "delta_0_1": -5.066263983433128e-05, "deltas_by_fold": [0.00038677081517757284, -0.000453240070163341], "mean_fold_delta": -3.3234627492884083e-05}, {"configuration": {"label": "density_by_contract", "by_contract": true}, "auc_0_1": 0.7701716723690579, "delta_0_1": -0.00032829298676362306, "deltas_by_fold": [0.0009044000473180658, -0.0014184463170308081], "mean_fold_delta": -0.0002570231348563712}]}
+CELL 26 END (255.9s)
+EXECUTION FINISHED probe_01

@@ -1,0 +1,19 @@
+{
+  "original_v17_definitions_preserved": 24,
+  "research_source_sha256": "800ff87e9b81858f48c693e03625fdc0c6af9b0c58f5b0abf4c59fa2c4a7ede3",
+  "density_fit_columns": [
+    "AMT_CREDIT",
+    "AMT_ANNUITY",
+    "NAME_CONTRACT_TYPE"
+  ],
+  "density_fit_rows": "outer training only",
+  "density_uses_target": false,
+  "density_uses_id": false,
+  "inherited_unsupervised_preprocessing": "unchanged v17, still uses train+test",
+  "threads_per_model": 2,
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds_executed": []
+}
