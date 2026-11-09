@@ -1,0 +1,65 @@
+{
+  "data_relato": "2026-10-28",
+  "fonte": "Top 10 transcrito pelo usuário nesta conversa; não consultado ao vivo",
+  "top10": [
+    {
+      "rank": 1,
+      "usuario": "Mohamed_Ashraf05",
+      "score_publico": 1.0
+    },
+    {
+      "rank": 2,
+      "usuario": "Mahmoud-Hashim",
+      "score_publico": 1.0
+    },
+    {
+      "rank": 3,
+      "usuario": "ankit_chaubey",
+      "score_publico": 1.0
+    },
+    {
+      "rank": 4,
+      "usuario": "NarlenBilik",
+      "score_publico": 0.99656
+    },
+    {
+      "rank": 5,
+      "usuario": "NaimAhmedRafi",
+      "score_publico": 0.9288
+    },
+    {
+      "rank": 6,
+      "usuario": "diwanparker",
+      "score_publico": 0.91863
+    },
+    {
+      "rank": 7,
+      "usuario": "Mohamed__Tamer",
+      "score_publico": 0.90315
+    },
+    {
+      "rank": 8,
+      "usuario": "ParamveerSingh",
+      "score_publico": 0.88991
+    },
+    {
+      "rank": 9,
+      "usuario": "Sourav_Pandey",
+      "score_publico": 0.85454
+    },
+    {
+      "rank": 10,
+      "usuario": "IbrahemElashry",
+      "score_publico": 0.82803
+    }
+  ],
+  "our_last_report": {
+    "version": "v20",
+    "score": 0.77877,
+    "rank": 38,
+    "participants": 2741,
+    "reported_on": "2026-10-26"
+  },
+  "gap_to_tenth": 0.04926,
+  "note": "O placar sozinho não permite explicar os métodos dos participantes. Nenhuma acusação ou limite teórico inferido."
+}
