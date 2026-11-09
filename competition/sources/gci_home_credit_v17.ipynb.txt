@@ -1,0 +1,690 @@
+
+# CELL 0 markdown
+# GCI World 2026 — Home Credit Default Risk · v17 (treino completo e reproduzível)
+**Objetivo:** prever a probabilidade de inadimplência (`TARGET = 1`). **Métrica:** ROC-AUC.
+
+Este notebook **treina todos os modelos do zero**, usando somente `input/train.csv` e `input/test.csv`, e gera
+`output/submission.csv`. Não há previsões salvas, *checkpoints* nem dados externos.
+
+**Componentes do ensemble** (validação cruzada de 5 partes, mesmas partes para todos):
+
+| Componente | O que é | AUC (validação) | Peso |
+|---|---|---|---|
+| LightGBM B + EXT auxiliares | árvores pequenas (9 folhas); variáveis ampliadas + estimativas das EXT_SOURCE | 0.77231 | 26.5% |
+| LightGBM B (variáveis da v7) | mesmo modelo, só com as variáveis da v7 (crédito, pessoa, tarifas) | 0.77041 | 5.1% |
+| Rede neural (MLP, 8 sementes) | PyTorch: quantis + embeddings de categorias; média de 8 redes | 0.77039 | 29.8% |
+| CatBoost + EXT auxiliares | categorias nativas; variáveis ampliadas + estimativas das EXT_SOURCE | 0.77206 | 38.6% |
+| **Ensemble** | média ponderada dos *rankings* | **0.77371** | |
+
+Pesos escolhidos nas partes 0–1 e conferidos nas partes 2–4 (partes 0–1: 0.77268; partes 2–4: 0.77440).
+
+**Como rodar:** coloque este notebook na pasta `competition` (a que tem `input/`), troque o caminho na célula do
+Drive e rode tudo. Tempo aproximado em CPU (2 núcleos): **≈ 20 minutos** para gerar o CSV.
+Com `RUN_CV = True`, ele também refaz a validação cruzada de todos os componentes (≈ 1h30 a mais; conferido: o ensemble dá 0.77371 e o CSV sai idêntico).
+
+**Reprodutibilidade:** todas as sementes são fixas e o nº de *threads* é fixo (2). Rodando no mesmo ambiente,
+o CSV sai idêntico (conferido pelo SHA-256 no final). Em outra máquina, versões diferentes de bibliotecas ou de
+CPU podem mudar casas decimais muito pequenas (o README da competição aceita isso).
+
+# CELL 1 markdown
+## 1. Setup
+
+# CELL 2 code
+# Bibliotecas: LightGBM, CatBoost e PyTorch. O Colab já vem com LightGBM e PyTorch; o CatBoost é instalado se faltar.
+import sys, subprocess, importlib.util
+for pkg, mod in [("catboost", "catboost"), ("lightgbm", "lightgbm"), ("torch", "torch")]:
+    if importlib.util.find_spec(mod) is None:
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", pkg], check=True)
+
+# CELL 3 code
+import os
+from pathlib import Path
+IN_COLAB = "google.colab" in sys.modules
+if IN_COLAB:
+    from google.colab import drive
+    drive.mount("/content/drive")
+    os.chdir("/content/drive/MyDrive/WhereThisNotebookIsLocated")  # ← TROQUE AQUI (pasta que contém input/)
+current_dir = Path(os.getcwd())
+print("Arquivos encontrados!" if (current_dir / "input" / "train.csv").exists() else "Confira o caminho da pasta.")
+
+RUN_CV = False   # True = refaz a validação cruzada de todos os componentes antes do treino final (bem mais lento)
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["Arquivos encontrados!\n"]}]
+
+# CELL 4 markdown
+## 2. Funções do pipeline
+Todas as funções usam só `train.csv` e `test.csv`. As que usam o `TARGET` são chamadas **dentro** de cada fold.
+
+# CELL 5 code
+import os, time, json, hashlib, warnings
+import numpy as np
+import pandas as pd
+import lightgbm as lgb
+from catboost import CatBoostClassifier
+from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.metrics import roc_auc_score
+from scipy.stats import rankdata
+warnings.filterwarnings("ignore")
+
+SEED = 42
+N_FOLDS = 5
+N_JOBS = 2          # fixo: o resultado não depende do nº de núcleos da máquina
+PRIOR = 0.0807      # taxa média de inadimplência no treino (usada na suavização)
+
+# CELL 6 markdown
+### 2.1 Limpeza e variáveis de crédito (v1)
+
+# CELL 7 code
+def make_features(df):
+    df = df.copy()
+    df["DAYS_EMPLOYED_ANOM"] = (df["DAYS_EMPLOYED"] == 365243).astype(int)   # 365243 = código, não valor
+    df.loc[df["DAYS_EMPLOYED"] == 365243, "DAYS_EMPLOYED"] = np.nan
+    df.loc[df["CODE_GENDER"] == "XNA", "CODE_GENDER"] = np.nan
+    df.loc[df["ORGANIZATION_TYPE"] == "XNA", "ORGANIZATION_TYPE"] = np.nan
+    df.loc[df["OWN_CAR_AGE"] >= 60, "OWN_CAR_AGE"] = np.nan
+    df["CREDIT_ANNUITY_RATIO"] = df["AMT_CREDIT"] / df["AMT_ANNUITY"]       # ≈ prazo (mistura prazo e juros)
+    df["ANNUITY_INCOME_RATIO"] = df["AMT_ANNUITY"] / df["AMT_INCOME_TOTAL"]
+    df["CREDIT_INCOME_RATIO"] = df["AMT_CREDIT"] / df["AMT_INCOME_TOTAL"]
+    df["CREDIT_GOODS_RATIO"] = df["AMT_CREDIT"] / df["AMT_GOODS_PRICE"]
+    df["CREDIT_GOODS_DIFF"] = df["AMT_CREDIT"] - df["AMT_GOODS_PRICE"]
+    df["INCOME_PER_PERSON"] = df["AMT_INCOME_TOTAL"] / df["CNT_FAM_MEMBERS"]
+    df["AGE_YEARS"] = -df["DAYS_BIRTH"] / 365.25
+    df["EMPLOYED_AGE_RATIO"] = df["DAYS_EMPLOYED"] / df["DAYS_BIRTH"]
+    df["ID_AGE_RATIO"] = df["DAYS_ID_PUBLISH"] / df["DAYS_BIRTH"]
+    df["PHONE_AGE_RATIO"] = df["DAYS_LAST_PHONE_CHANGE"] / df["DAYS_BIRTH"]
+    df["CAR_AGE_RATIO"] = df["OWN_CAR_AGE"] / df["AGE_YEARS"]
+    return df
+
+# CELL 8 markdown
+### 2.2 Pedidos possivelmente da mesma pessoa (v4)
+Diferenças entre datas que não mudam de um pedido para outro: nascimento − documento, − registro, − telefone.
+Mesmo sexo + mesmo par de diferenças = grupo de pedidos relacionados (hipótese, não prova de identidade).
+
+# CELL 9 code
+def person_groups(raw):
+    k = pd.DataFrame({"ID": raw["DAYS_BIRTH"] - raw["DAYS_ID_PUBLISH"],
+                      "REG": raw["DAYS_BIRTH"] - raw["DAYS_REGISTRATION"],
+                      "PHONE": raw["DAYS_BIRTH"] - raw["DAYS_LAST_PHONE_CHANGE"],
+                      "G": raw["CODE_GENDER"]})
+    groups = {}
+    for name, cols in {"A": ["ID", "REG", "G"], "B": ["ID", "PHONE", "G"]}.items():
+        g = k.groupby(cols).ngroup().to_numpy().copy()
+        alone = g < 0                                   # faltante → grupo de um pedido só
+        g[alone] = g.max() + 1 + np.arange(alone.sum())
+        groups[name] = g
+    return groups
+
+def person_features(raw, groups):
+    f = pd.DataFrame(index=raw.index)
+    age_days = -raw["DAYS_BIRTH"].values
+    for name, g in groups.items():
+        s = pd.Series(g)
+        f[f"P{name}_CNT"] = s.map(s.value_counts()).values
+        order = pd.DataFrame({"g": g, "d": age_days})
+        f[f"P{name}_RANK"] = order.groupby("g")["d"].rank(method="first").values - 1
+        srt = order.sort_values(["g", "d"])
+        f[f"P{name}_PREV_GAP"] = srt.groupby("g")["d"].diff().reindex(order.index).values
+        f[f"P{name}_NEXT_GAP"] = (-srt.groupby("g")["d"].diff(-1)).reindex(order.index).values
+        for c in ["AMT_CREDIT", "AMT_INCOME_TOTAL", "EXT_SOURCE_2"]:
+            f[f"P{name}_{c}_REL"] = raw[c].values / pd.Series(raw[c].values).groupby(g).transform("mean").values
+    return f
+
+# CELL 10 markdown
+### 2.3 "Tarifas" (v6)
+A razão exata crédito ÷ prestação se repete (combinações fixas de prazo e juros). Contamos quantas vezes cada
+valor exato aparece; a taxa de calote de cada tarifa é calculada fora-da-parte (seção 2.6).
+
+# CELL 11 code
+def tariff_counts(raw):
+    ratio = raw["AMT_CREDIT"] / raw["AMT_ANNUITY"]
+    t = pd.DataFrame(index=raw.index)
+    for d in [1, 2, 3]:
+        k = ratio.round(d)
+        t[f"Q{d}_COUNT"] = k.map(k.value_counts()).values
+    for c in ["AMT_CREDIT", "AMT_ANNUITY", "AMT_GOODS_PRICE", "AMT_INCOME_TOTAL"]:
+        t[c + "_VCOUNT"] = raw[c].map(raw[c].value_counts()).values
+    t["Q_FRAC"] = (ratio * 1000).round() % 1000
+    return t
+
+def _codes(*cols):
+    key = cols[0].astype(str)
+    for c in cols[1:]:
+        key = key + "|" + c.astype(str)
+    return pd.factorize(key)[0]
+
+def tariff_keys(raw):
+    ratio = raw["AMT_CREDIT"] / raw["AMT_ANNUITY"]
+    return {f"Q{d}": ratio.round(d).fillna(-1).values for d in [1, 2, 3, 4]}
+
+# CELL 12 markdown
+### 2.4 Variáveis ampliadas (revisão v8)
+Agregações das `EXT_SOURCE`, faltantes, razões extras, "datas fixas" numéricas e valores relativos ao grupo.
+
+# CELL 13 code
+def enhanced_features(raw, base):
+    out = base.copy()
+    ext_cols = ["EXT_SOURCE_1", "EXT_SOURCE_2", "EXT_SOURCE_3"]
+    ext = raw[ext_cols]
+    for agg in ["mean", "min", "max", "std", "median"]:
+        out["EXT_" + agg.upper()] = getattr(ext, agg)(axis=1)
+    out["EXT_N_VALID"] = ext.notna().sum(axis=1)
+    out["EXT_RANGE"] = ext.max(axis=1) - ext.min(axis=1)
+    out["EXT_PRODUCT"] = ext.prod(axis=1, min_count=3)
+    for a, b in [(1, 2), (1, 3), (2, 3)]:
+        x, z = raw[f"EXT_SOURCE_{a}"], raw[f"EXT_SOURCE_{b}"]
+        out[f"EXT_{a}{b}_PRODUCT"] = x * z
+        out[f"EXT_{a}{b}_MEAN"] = (x + z) / 2
+        out[f"EXT_{a}{b}_DIFF"] = x - z
+    out["N_MISSING_RAW"] = raw.isna().sum(axis=1)
+    out["EXT_2_AGE"] = raw["EXT_SOURCE_2"] * (-raw["DAYS_BIRTH"] / 365.25)
+    out["EXT_3_AGE"] = raw["EXT_SOURCE_3"] * (-raw["DAYS_BIRTH"] / 365.25)
+    def ratio(name, num, den):
+        out[name] = num / den.replace(0, np.nan)
+    ratio("ANNUITY_GOODS_RATIO", raw.AMT_ANNUITY, raw.AMT_GOODS_PRICE)
+    ratio("GOODS_INCOME_RATIO", raw.AMT_GOODS_PRICE, raw.AMT_INCOME_TOTAL)
+    ratio("GOODS_CREDIT_RATIO", raw.AMT_GOODS_PRICE, raw.AMT_CREDIT)
+    ratio("INCOME_ANNUITY_RATIO", raw.AMT_INCOME_TOTAL, raw.AMT_ANNUITY)
+    ratio("CREDIT_PER_PERSON", raw.AMT_CREDIT, raw.CNT_FAM_MEMBERS)
+    ratio("ANNUITY_PER_PERSON", raw.AMT_ANNUITY, raw.CNT_FAM_MEMBERS)
+    out["INCOME_AFTER_ANNUITY"] = raw.AMT_INCOME_TOTAL - raw.AMT_ANNUITY
+    ratio("INCOME_AFTER_ANNUITY_PERSON", out.INCOME_AFTER_ANNUITY, raw.CNT_FAM_MEMBERS)
+    out["N_ADULTS"] = raw.CNT_FAM_MEMBERS - raw.CNT_CHILDREN
+    ratio("CHILDREN_FAMILY_RATIO", raw.CNT_CHILDREN, raw.CNT_FAM_MEMBERS)
+    out["AGE_AT_ID"] = raw.DAYS_ID_PUBLISH - raw.DAYS_BIRTH
+    out["AGE_AT_REGISTRATION"] = raw.DAYS_REGISTRATION - raw.DAYS_BIRTH
+    out["AGE_AT_PHONE"] = raw.DAYS_LAST_PHONE_CHANGE - raw.DAYS_BIRTH
+    out["ID_PHONE_GAP"] = raw.DAYS_ID_PUBLISH - raw.DAYS_LAST_PHONE_CHANGE
+    out["REGISTRATION_ID_GAP"] = raw.DAYS_REGISTRATION - raw.DAYS_ID_PUBLISH
+    out["EMPLOYED_PHONE_GAP"] = out.DAYS_EMPLOYED - raw.DAYS_LAST_PHONE_CHANGE
+    ratio("EMPLOYED_PHONE_RATIO", out.DAYS_EMPLOYED, raw.DAYS_LAST_PHONE_CHANGE)
+    for c in ext_cols + ["OWN_CAR_AGE", "AMT_REQ_CREDIT_BUREAU_YEAR"]:
+        out[c + "_MISSING"] = raw[c].isna().astype("int8")
+    out["BUREAU_SUM"] = raw[["AMT_REQ_CREDIT_BUREAU_HOUR", "AMT_REQ_CREDIT_BUREAU_MON", "AMT_REQ_CREDIT_BUREAU_QRT",
+                             "AMT_REQ_CREDIT_BUREAU_YEAR"]].sum(axis=1, min_count=1)
+    for group_cols in [["NAME_INCOME_TYPE"], ["OCCUPATION_TYPE"], ["ORGANIZATION_TYPE"], ["NAME_EDUCATION_TYPE", "CODE_GENDER"]]:
+        key = raw[group_cols].fillna("__NA__").astype(str).agg("|".join, axis=1)
+        tag = "_".join(group_cols)
+        for c in ["AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY"]:
+            med = raw[c].groupby(key).transform("median")
+            out[c + "_GROUP_REL_" + tag] = raw[c] / med.replace(0, np.nan)
+    return out.replace([np.inf, -np.inf], np.nan)
+
+# CELL 14 markdown
+### 2.5 Estimativas auxiliares das `EXT_SOURCE` (ideia da v10, sem `TARGET`)
+Muitos clientes não têm `EXT_SOURCE_1` (≈ 56%) ou `EXT_SOURCE_3` (≈ 20%). Um modelo auxiliar aprende a estimar
+cada nota a partir das outras colunas, **sem usar o `TARGET`**. Para quem tem a nota, a estimativa é fora-da-parte
+(o modelo nunca viu aquela linha), então a diferença "nota real − estimada" também é informativa.
+
+# CELL 15 code
+def ext_aux_features(X_num, raw, seed=SEED):
+    out = pd.DataFrame(index=raw.index)
+    params = dict(objective="regression", learning_rate=0.05, num_leaves=31, min_child_samples=100,
+                  feature_fraction=0.7, bagging_fraction=0.8, bagging_freq=1, n_estimators=400,
+                  deterministic=True, force_row_wise=True, verbose=-1, n_jobs=N_JOBS, random_state=seed)
+    ext_cols = ["EXT_SOURCE_1", "EXT_SOURCE_2", "EXT_SOURCE_3"]
+    drop = [c for c in X_num.columns if c.startswith("EXT_") or "EXT_SOURCE" in c]
+    F = X_num.drop(columns=drop)
+    for c in ext_cols:
+        target = raw[c].values
+        has = ~np.isnan(target)
+        idx = np.where(has)[0]; miss = np.where(~has)[0]
+        pred = np.full(len(raw), np.nan); pred_miss = np.zeros(len(miss))
+        others = [o for o in ext_cols if o != c]
+        Fc = pd.concat([F, raw[others].reset_index(drop=True)], axis=1)
+        for a, b in KFold(5, shuffle=True, random_state=seed).split(idx):
+            m = lgb.LGBMRegressor(**params).fit(Fc.iloc[idx[a]], target[idx[a]])
+            pred[idx[b]] = m.predict(Fc.iloc[idx[b]])
+            if len(miss):
+                pred_miss += m.predict(Fc.iloc[miss]) / 5
+        pred[miss] = pred_miss
+        k = c[-1]
+        out[f"EXT{k}_PRED"] = pred
+        out[f"EXT{k}_FILL"] = np.where(has, target, pred)
+        out[f"EXT{k}_RESID"] = np.where(has, target - pred, np.nan)
+    fills = out[[f"EXT{k}_FILL" for k in "123"]]
+    out["EXTF_MEAN"] = fills.mean(axis=1)
+    out["EXTF_PROD"] = fills.prod(axis=1)
+    out["EXTF_MIN"] = fills.min(axis=1)
+    out["EXTF_W"] = 2 * out["EXT1_FILL"] + out["EXT2_FILL"] + 3 * out["EXT3_FILL"]
+    return out
+
+# CELL 16 markdown
+### 2.6 Variáveis que usam o `TARGET` (sempre fora-da-parte)
+- **Histórico dos outros pedidos do grupo** (soma, nº e média do `TARGET`), sem a própria linha.
+- **Taxa de calote suavizada** de cada tarifa (razão com 1, 2, 3 e 4 casas):
+  `(calotes + 0,0807·k) / (pedidos + k)`.
+Nas linhas de treino, a taxa vem de 5 partes internas (a linha nunca participa do próprio cálculo).
+Validação e teste usam só os `TARGET` do treino daquele fold.
+
+# CELL 17 code
+def _rate_stats(key, y_all, src):
+    return pd.DataFrame({"k": key[src], "y": y_all[src]}).groupby("k")["y"].agg(["sum", "count"])
+
+def _rates(key, st, dst, ks):
+    kd = pd.Series(key[dst])
+    s = kd.map(st["sum"]).fillna(0).values; c = kd.map(st["count"]).fillna(0).values
+    return [(s + PRIOR * k) / (c + k) for k in ks]
+
+def nested_rates(key, y_all, src, dst, ks=(30,), inner_seed=7):
+    """Taxa de calote suavizada por chave; linhas de dst que estão em src recebem valor fora-da-parte."""
+    out = [np.zeros(len(dst)) for _ in ks]
+    in_src = np.isin(dst, src)
+    if (~in_src).any():
+        st = _rate_stats(key, y_all, src)
+        for o, v in zip(out, _rates(key, st, dst[~in_src], ks)):
+            o[~in_src] = v
+    if in_src.any():
+        d = dst[in_src]; tmp = [np.zeros(len(d)) for _ in ks]
+        for ia, ib in StratifiedKFold(5, shuffle=True, random_state=inner_seed).split(d, y_all[d]):
+            st = _rate_stats(key, y_all, d[ia])
+            for t, v in zip(tmp, _rates(key, st, d[ib], ks)):
+                t[ib] = v
+        for o, t in zip(out, tmp):
+            o[in_src] = t
+    return out
+
+class Supervised:
+    """Acrescenta as colunas que dependem do TARGET para as linhas `dst`, usando só os rótulos de `src`."""
+    def __init__(self, groups, tkeys, y_all):
+        self.groups, self.tkeys, self.y_all = groups, tkeys, y_all
+    def add(self, X_part, src, dst):
+        X = X_part.copy(); y_all = self.y_all
+        for name, g in self.groups.items():
+            st = pd.DataFrame({"g": g[src], "y": y_all[src]}).groupby("g")["y"].agg(["sum", "count"])
+            gs = pd.Series(g[dst])
+            total = gs.map(st["sum"]).fillna(0).values; count = gs.map(st["count"]).fillna(0).values
+            own = np.isin(dst, src); own_y = np.where(own, y_all[dst], 0)
+            total, count = total - own_y, count - own
+            X[f"P{name}_MATE_SUM"] = total
+            X[f"P{name}_MATE_CNT"] = count
+            X[f"P{name}_MATE_MEAN"] = np.where(count > 0, total / np.maximum(count, 1), np.nan)
+        for name, key in self.tkeys.items():
+            X[name + "_TE"] = nested_rates(key, y_all, src, dst, ks=(30,))[0]
+        return X
+
+# CELL 18 markdown
+### 2.7 Modelos
+Cada componente = um conjunto de variáveis + um modelo. Os hiperparâmetros do LightGBM A e B vieram de buscas
+com Optuna (v5 e v7). O CatBoost usa as categorias de texto diretamente.
+
+# CELL 19 code
+LGB_BASE = dict(objective="binary", learning_rate=0.02, bagging_freq=1, deterministic=True,
+                force_row_wise=True, verbose=-1, n_jobs=N_JOBS)
+LGB_PARAMS = {
+    "A": dict(LGB_BASE, num_leaves=35, min_child_samples=28, feature_fraction=0.157, bagging_fraction=0.98,
+              reg_lambda=13.1, reg_alpha=0.92, min_split_gain=0.57, max_bin=127),
+    "B": dict(LGB_BASE, num_leaves=9, min_child_samples=179, feature_fraction=0.44, bagging_fraction=0.74,
+              reg_lambda=1.72, reg_alpha=0.23, min_split_gain=0.088, max_bin=63),
+}
+CAT_PARAMS = dict(learning_rate=0.04, depth=6, l2_leaf_reg=5, verbose=0, allow_writing_files=False,
+                  thread_count=N_JOBS)
+
+def make_model(kind, seed, n_trees=None, cat_cols=None):
+    if kind in LGB_PARAMS:
+        return lgb.LGBMClassifier(**LGB_PARAMS[kind], n_estimators=n_trees or 10000, random_state=seed)
+    if kind == "cat":
+        extra = dict(iterations=n_trees) if n_trees else dict(iterations=4000, eval_metric="AUC", od_type="Iter", od_wait=200)
+        return CatBoostClassifier(**CAT_PARAMS, **extra, cat_features=cat_cols, random_seed=seed)
+    raise ValueError(kind)
+
+def fit_with_es(model, kind, Xtr, ytr, Xva, yva):
+    if kind == "cat":
+        model.fit(Xtr, ytr, eval_set=(Xva, yva), use_best_model=True)
+        return model, model.get_best_iteration() + 1
+    model.fit(Xtr, ytr, eval_set=[(Xva, yva)], eval_metric="auc", callbacks=[lgb.early_stopping(200, verbose=False)])
+    return model, model.best_iteration_
+
+def to_rank(p):
+    return (rankdata(p) - 0.5) / len(p)
+
+# CELL 20 markdown
+### 2.8 Montagem das tabelas de variáveis
+
+# CELL 21 code
+def prepare(train, test, verbose=True):
+    t0 = time.time()
+    y = train["TARGET"].to_numpy(); n = len(train)
+    raw = pd.concat([train.drop(columns="TARGET"), test], ignore_index=True)
+    full = make_features(raw).drop(columns="SK_ID_CURR")          # o ID é só o número da linha: não entra
+    cat_cols = full.select_dtypes(exclude="number").columns.tolist()
+    groups = person_groups(raw)
+    person = person_features(raw, groups)
+    tariff = tariff_counts(raw)
+    full_lgb = full.copy()
+    for c in cat_cols:
+        full_lgb[c + "_COUNT"] = full_lgb[c].map(full_lgb[c].value_counts())
+        full_lgb[c] = full_lgb[c].astype("category").cat.codes
+    full_lgb = pd.concat([full_lgb, person, tariff], axis=1)
+    full_cat = full.copy()
+    for c in cat_cols:
+        full_cat[c] = full_cat[c].fillna("NA").astype(str)
+    full_cat = pd.concat([full_cat, person, tariff], axis=1)
+    plus = enhanced_features(raw, full_lgb)
+    plus_cat = enhanced_features(raw, full_cat)
+    ext = ext_aux_features(full_lgb, raw)
+    sets = {"base": full_lgb,                                  # variáveis da v7
+            "plusx": pd.concat([plus, ext], axis=1),           # + ampliadas + estimativas das EXT_SOURCE
+            "catx": pd.concat([plus_cat, ext], axis=1)}        # idem, com as categorias em texto (CatBoost)
+    y_all = np.concatenate([y, np.zeros(len(test))])
+    ctx = dict(y=y, n=n, raw=raw, cat_cols=cat_cols, ids=test["SK_ID_CURR"].to_numpy(),
+               sup=Supervised(groups, tariff_keys(raw), y_all),
+               X={k: v.iloc[:n].reset_index(drop=True) for k, v in sets.items()},
+               Xt={k: v.iloc[n:].reset_index(drop=True) for k, v in sets.items()})
+    if verbose:
+        print({k: v.shape[1] for k, v in sets.items()}, f"{time.time()-t0:.0f}s")
+    return ctx
+
+# CELL 22 markdown
+### 2.9 Validação cruzada de um componente e treino final
+
+# CELL 23 code
+def run_cv(ctx, fset, kind, seeds=(42,), fold_seed=SEED, log=print):
+    """Mesmas 5 partes para todos os componentes (fold_seed); `seeds` = sementes do modelo, cuja média é feita."""
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    oof = np.zeros(n); pte = np.zeros(len(Xt)); its = []
+    folds = list(StratifiedKFold(N_FOLDS, shuffle=True, random_state=fold_seed).split(X, y))
+    t0 = time.time()
+    for f, (a, b) in enumerate(folds):
+        Xa = sup.add(X.iloc[a], a, a); Xb = sup.add(X.iloc[b], a, b)
+        for s in seeds:
+            m = make_model(kind, s, cat_cols=ctx["cat_cols"])
+            m, it = fit_with_es(m, kind, Xa, y[a], Xb, y[b]); its.append(it)
+            oof[b] += m.predict_proba(Xb)[:, 1] / len(seeds)
+            pte += m.predict_proba(Xt_sup)[:, 1] / (len(seeds) * N_FOLDS)
+        log(f"  {fset}/{kind} fold {f}: AUC {roc_auc_score(y[b], oof[b]):.5f} ({time.time()-t0:.0f}s)")
+    fold_id = np.zeros(n, int)
+    for f, (a, b) in enumerate(folds):
+        fold_id[b] = f
+    return dict(oof=oof, test=pte, its=its, fold_id=fold_id, auc=roc_auc_score(y, oof))
+
+def fit_full(ctx, fset, kind, n_trees, seeds=(42,)):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xall = sup.add(X, idx_tr, idx_tr); Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    p = np.zeros(len(Xt))
+    for s in seeds:
+        p += make_model(kind, s, n_trees=n_trees, cat_cols=ctx["cat_cols"]).fit(Xall, y).predict_proba(Xt_sup)[:, 1] / len(seeds)
+    return p
+
+# CELL 24 markdown
+### 2.10 Rede neural para tabelas (PyTorch, CPU)
+Árvores e redes erram de jeitos diferentes, por isso uma rede ajuda no ensemble mesmo sendo pior sozinha.
+- Números: transformação por quantis (vira uma distribuição normal) + indicador de faltante.
+- Categorias: *embeddings* (cada categoria vira um vetor aprendido).
+- Média de vários membros (sementes) para estabilidade.
+
+# CELL 25 code
+def nn_available():
+    try:
+        import torch  # noqa
+        return True
+    except ImportError:
+        return False
+
+def nn_inputs(X_all_num, cat_codes, n_quantiles=1000):
+    """Prepara a matriz numérica (quantis → normal, faltante → 0 + indicador). Sem TARGET."""
+    from sklearn.preprocessing import QuantileTransformer
+    Xn = X_all_num.replace([np.inf, -np.inf], np.nan)
+    miss_cols = [c for c in Xn.columns if Xn[c].isna().mean() > 0.01]
+    qt = QuantileTransformer(n_quantiles=n_quantiles, output_distribution="normal", subsample=10**9, random_state=0)
+    Z = qt.fit_transform(Xn.to_numpy(dtype=np.float64))
+    Z = np.nan_to_num(Z, nan=0.0).astype(np.float32)
+    M = Xn[miss_cols].isna().to_numpy(np.float32)
+    return np.hstack([Z, M]), cat_codes.astype(np.int64)
+
+NN_PARAMS = dict(lr=5e-4, wd=1e-4, drop1=0.5, drop2=0.4, bs=1024, h1=512, h2=256)   # escolhidos na validação
+
+def train_nn(Xn_tr, Xc_tr, y_tr, Xn_va, Xc_va, y_va, Xn_te_list, Xc_te_list, seed, cat_card,
+             epochs=50, patience=6, n_epochs_fixed=None, log=None, hp=None):
+    hp = dict(NN_PARAMS, **(hp or {}))
+    import torch, torch.nn as nn
+    torch.manual_seed(seed); np.random.seed(seed)
+    torch.set_num_threads(N_JOBS); torch.use_deterministic_algorithms(True)
+    d_num = Xn_tr.shape[1]
+
+    class Net(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.embs = nn.ModuleList([nn.Embedding(c + 2, min(16, (c + 2) // 2 + 1)) for c in cat_card])
+            d_emb = sum(e.embedding_dim for e in self.embs)
+            d_in = d_num + d_emb
+            h1, h2 = hp["h1"], hp["h2"]
+            self.mlp = nn.Sequential(nn.Linear(d_in, h1), nn.BatchNorm1d(h1), nn.ReLU(), nn.Dropout(hp["drop1"]),
+                                     nn.Linear(h1, h2), nn.BatchNorm1d(h2), nn.ReLU(), nn.Dropout(hp["drop2"]),
+                                     nn.Linear(h2, 1))
+        def forward(self, xn, xc):
+            e = [emb(xc[:, i] + 1) for i, emb in enumerate(self.embs)]
+            return self.mlp(torch.cat([xn] + e, 1)).squeeze(1)
+
+    net = Net(); opt = torch.optim.AdamW(net.parameters(), lr=hp["lr"], weight_decay=hp["wd"])
+    lossf = nn.BCEWithLogitsLoss()
+    tn = lambda a: torch.from_numpy(a)
+    Xn_t, Xc_t, y_t = tn(Xn_tr), tn(Xc_tr), tn(y_tr.astype(np.float32))
+    def predict(xn, xc):
+        net.eval(); out = []
+        with torch.no_grad():
+            for i in range(0, len(xn), 8192):
+                out.append(torch.sigmoid(net(tn(xn[i:i+8192]), tn(xc[i:i+8192]))).numpy())
+        return np.concatenate(out)
+    g = torch.Generator().manual_seed(seed)
+    best, best_state, bad, best_ep = -1, None, 0, 0
+    n_ep = n_epochs_fixed or epochs
+    for ep in range(n_ep):
+        net.train()
+        perm = torch.randperm(len(Xn_t), generator=g)
+        for i in range(0, len(perm), hp["bs"]):
+            b = perm[i:i+hp["bs"]]
+            opt.zero_grad(); loss = lossf(net(Xn_t[b], Xc_t[b]), y_t[b]); loss.backward(); opt.step()
+        if n_epochs_fixed is None:
+            auc = roc_auc_score(y_va, predict(Xn_va, Xc_va))
+            if log: log(f"    época {ep+1}: AUC {auc:.5f}")
+            if auc > best:
+                best, bad, best_ep = auc, 0, ep + 1
+                best_state = {k: v.clone() for k, v in net.state_dict().items()}
+            else:
+                bad += 1
+                if bad >= patience:
+                    break
+    if best_state is not None:
+        net.load_state_dict(best_state)
+    pva = predict(Xn_va, Xc_va) if Xn_va is not None else None
+    ptes = [predict(a, b) for a, b in zip(Xn_te_list, Xc_te_list)]
+    return pva, ptes, best_ep
+
+def _nn_split(ctx, Xs):
+    cats = ctx["cat_cols"]
+    num = [X.drop(columns=cats) for X in Xs]
+    lens = [len(x) for x in num]
+    Zall, Call = nn_inputs(pd.concat(num, ignore_index=True), pd.concat([X[cats] for X in Xs], ignore_index=True).to_numpy())
+    out, s = [], 0
+    for L in lens:
+        out.append((Zall[s:s+L], Call[s:s+L])); s += L
+    return out
+
+def run_cv_nn(ctx, fset, seeds=(42,), fold_seed=SEED, log=print, hp=None, epochs=50, patience=6):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    card = [int(max(X[c].max(), Xt[c].max())) + 1 for c in ctx["cat_cols"]]
+    oof = np.zeros(n); pte = np.zeros(len(Xt)); its = []; t0 = time.time()
+    folds = list(StratifiedKFold(N_FOLDS, shuffle=True, random_state=fold_seed).split(X, y))
+    for f, (a, b) in enumerate(folds):
+        Xa = sup.add(X.iloc[a], a, a); Xb = sup.add(X.iloc[b], a, b)
+        (Za, Ca), (Zb, Cb), (Zt, Ct) = _nn_split(ctx, [Xa, Xb, Xt_sup])
+        for s in seeds:
+            pva, (pt,), ep = train_nn(Za, Ca, y[a], Zb, Cb, y[b], [Zt], [Ct], s, card, hp=hp,
+                                      epochs=epochs, patience=patience)
+            oof[b] += pva / len(seeds); pte += pt / (len(seeds) * N_FOLDS); its.append(ep)
+        log(f"  NN {fset} fold {f}: AUC {roc_auc_score(y[b], oof[b]):.5f} épocas {its[-len(seeds):]} ({time.time()-t0:.0f}s)")
+    return dict(oof=oof, test=pte, its=its, auc=roc_auc_score(y, oof))
+
+def fit_full_nn(ctx, fset, n_epochs, seeds=(42,), hp=None):
+    y, n, sup = ctx["y"], ctx["n"], ctx["sup"]
+    X, Xt = ctx["X"][fset], ctx["Xt"][fset]
+    idx_tr, idx_te = np.arange(n), np.arange(n, n + len(Xt))
+    Xall = sup.add(X, idx_tr, idx_tr); Xt_sup = sup.add(Xt, idx_tr, idx_te)
+    card = [int(max(X[c].max(), Xt[c].max())) + 1 for c in ctx["cat_cols"]]
+    (Za, Ca), (Zt, Ct) = _nn_split(ctx, [Xall, Xt_sup])
+    p = np.zeros(len(Xt))
+    for s in seeds:
+        _, (pt,), _ = train_nn(Za, Ca, y, None, None, None, [Zt], [Ct], s, card, n_epochs_fixed=n_epochs, hp=hp)
+        p += pt / len(seeds)
+    return p
+
+# CELL 26 markdown
+## 3. Carregar os dados e montar as variáveis
+Tudo que **não** usa o `TARGET` é calculado uma vez, juntando treino e teste (contagens, grupos, estimativas
+auxiliares das `EXT_SOURCE`). O que usa o `TARGET` é calculado depois, dentro de cada treino (seção 2.6).
+
+# CELL 27 code
+train = pd.read_csv(current_dir / "input" / "train.csv")
+test = pd.read_csv(current_dir / "input" / "test.csv")
+sample_sub = pd.read_csv(current_dir / "input" / "sample_submission.csv")
+print("train:", train.shape, " test:", test.shape, " inadimplência:", round(train["TARGET"].mean(), 4))
+ctx = prepare(train, test)
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["train: (171202, 34)  test: (61500, 33)  inadimplência: 0.0807\n"]}, {"name": "stdout", "output_type": "stream", "text": ["{'base': 74, 'plusx': 142, 'catx': 134} 142s\n"]}]
+
+# CELL 28 markdown
+## 4. Configuração final do ensemble
+Para cada componente: conjunto de variáveis, modelo, sementes, nº de árvores/épocas do treino final
+(média do *early stopping* na validação × 1,15) e peso no ensemble.
+
+# CELL 29 code
+COMPONENTS = [{'label': 'LightGBM B + EXT auxiliares',
+  'fset': 'plusx',
+  'kind': 'B',
+  'seeds': [42, 2024, 7],
+  'size': 1646,
+  'hp': None,
+  'cv': 0.77231,
+  'weight': 0.265},
+ {'label': 'LightGBM B (variáveis da v7)',
+  'fset': 'base',
+  'kind': 'B',
+  'seeds': [42, 2024, 7],
+  'size': 1793,
+  'hp': None,
+  'cv': 0.77041,
+  'weight': 0.051},
+ {'label': 'Rede neural (MLP, 8 sementes)',
+  'fset': 'plusx',
+  'kind': 'nn',
+  'seeds': [42, 2024, 7, 11, 99, 123, 5, 77],
+  'size': 10,
+  'hp': {'lr': 0.0005, 'wd': 0.0001, 'drop1': 0.5, 'drop2': 0.4, 'bs': 1024, 'h1': 512, 'h2': 256},
+  'cv': 0.77039,
+  'weight': 0.298},
+ {'label': 'CatBoost + EXT auxiliares',
+  'fset': 'catx',
+  'kind': 'cat',
+  'seeds': [42, 2024],
+  'size': 1094,
+  'hp': None,
+  'cv': 0.77206,
+  'weight': 0.386}]
+
+for c in COMPONENTS:
+    print(f"{c['label']:28s} peso {c['weight']:.3f}  sementes {c['seeds']}  tamanho {c['size']}")
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646\n", "LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793\n", "Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10\n", "CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094\n"]}]
+
+# CELL 30 markdown
+## 5. (Opcional) Refazer a validação cruzada
+Com `RUN_CV = True`, cada componente é avaliado nas 5 partes e o ensemble é recalculado com os pesos acima.
+
+# CELL 31 code
+if RUN_CV:
+    oofs = {}
+    for c in COMPONENTS:
+        if c["kind"] == "nn":
+            r = run_cv_nn(ctx, c["fset"], seeds=tuple(c["seeds"]), hp=c["hp"])
+        else:
+            r = run_cv(ctx, c["fset"], c["kind"], seeds=tuple(c["seeds"]))
+        oofs[c["label"]] = r["oof"]
+        print(f"{c['label']}: AUC {r['auc']:.5f}")
+    blend_oof = sum(c["weight"] * to_rank(oofs[c["label"]]) ** 2 for c in COMPONENTS)
+    print(f"Ensemble — AUC da validação cruzada: {roc_auc_score(ctx['y'], blend_oof):.5f}")
+
+# CELL 32 markdown
+## 6. Treino final com 100% dos dados e ensemble
+Cada componente é treinado de novo com todo o treino, com o nº fixo de árvores/épocas. A previsão final é a
+média ponderada dos *rankings* (posição de cada cliente entre 0 e 1, elevada ao quadrado): o AUC só depende da ordem.
+
+# CELL 33 code
+import time
+preds = {}
+t0 = time.time()
+for c in COMPONENTS:
+    if c["kind"] == "nn":
+        p = fit_full_nn(ctx, c["fset"], c["size"], seeds=tuple(c["seeds"]), hp=c["hp"])
+    else:
+        p = fit_full(ctx, c["fset"], c["kind"], c["size"], seeds=tuple(c["seeds"]))
+    preds[c["label"]] = p
+    print(f"{c['label']:28s} pronto ({time.time()-t0:.0f}s)")
+POWER = 2   # percentil ao quadrado antes da soma: dá um pouco mais de peso a quem cada modelo acha mais arriscado
+pred = sum(c["weight"] * to_rank(preds[c["label"]]) ** POWER for c in COMPONENTS)
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["LightGBM B + EXT auxiliares  pronto (182s)\n"]}, {"name": "stdout", "output_type": "stream", "text": ["LightGBM B (variáveis da v7) pronto (303s)\n"]}, {"name": "stdout", "output_type": "stream", "text": ["Rede neural (MLP, 8 sementes) pronto (637s)\n"]}, {"name": "stdout", "output_type": "stream", "text": ["CatBoost + EXT auxiliares    pronto (1019s)\n"]}]
+
+# CELL 34 markdown
+## 7. Gerar o arquivo de submissão
+As duas primeiras células são as do tutorial.
+
+# CELL 35 code
+sample_sub["TARGET"] = pred
+sample_sub
+# OUTPUTS
+[{"data": {"text/html": ["<div>\n", "<style scoped>\n", "    .dataframe tbody tr th:only-of-type {\n", "        vertical-align: middle;\n", "    }\n", "\n", "    .dataframe tbody tr th {\n", "        vertical-align: top;\n", "    }\n", "\n", "    .dataframe thead th {\n", "        text-align: right;\n", "    }\n", "</style>\n", "<table border=\"1\" class=\"dataframe\">\n", "  <thead>\n", "    <tr style=\"text-align: right;\">\n", "      <th></th>\n", "      <th>SK_ID_CURR</th>\n", "      <th>TARGET</th>\n", "    </tr>\n", "  </thead>\n", "  <tbody>\n", "    <tr>\n", "      <th>0</th>\n", "      <td>171202</td>\n", "      <td>0.061636</td>\n", "    </tr>\n", "    <tr>\n", "      <th>1</th>\n", "      <td>171203</td>\n", "      <td>0.903850</td>\n", "    </tr>\n", "    <tr>\n", "      <th>2</th>\n", "      <td>171204</td>\n", "      <td>0.631415</td>\n", "    </tr>\n", "    <tr>\n", "      <th>3</th>\n", "      <td>171205</td>\n", "      <td>0.435673</td>\n", "    </tr>\n", "    <tr>\n", "      <th>4</th>\n", "      <td>171206</td>\n", "      <td>0.843123</td>\n", "    </tr>\n", "    <tr>\n", "      <th>...</th>\n", "      <td>...</td>\n", "      <td>...</td>\n", "    </tr>\n", "    <tr>\n", "      <th>61495</th>\n", "      <td>232697</td>\n", "      <td>0.749571</td>\n", "    </tr>\n", "    <tr>\n", "      <th>61496</th>\n", "      <td>232698</td>\n", "      <td>0.021747</td>\n", "    </tr>\n", "    <tr>\n", "      <th>61497</th>\n", "      <td>232699</td>\n", "      <td>0.368590</td>\n", "    </tr>\n", "    <tr>\n", "      <th>61498</th>\n", "      <td>232700</td>\n", "      <td>0.934878</td>\n", "    </tr>\n", "    <tr>\n", "      <th>61499</th>\n", "      <td>232701</td>\n", "      <td>0.565143</td>\n", "    </tr>\n", "  </tbody>\n", "</table>\n", "<p>61500 rows × 2 columns</p>\n", "</div>"], "text/plain": ["       SK_ID_CURR    TARGET\n", "0          171202  0.061636\n", "1          171203  0.903850\n", "2          171204  0.631415\n", "3          171205  0.435673\n", "4          171206  0.843123\n", "...           ...       ...\n", "61495      232697  0.749571\n", "61496      232698  0.021747\n", "61497      232699  0.368590\n", "61498      232700  0.934878\n", "61499      232701  0.565143\n", "\n", "[61500 rows x 2 columns]"]}, "execution_count": 18, "metadata": {}, "output_type": "execute_result"}]
+
+# CELL 36 code
+output_dir = current_dir / "output"
+os.makedirs(output_dir, exist_ok=True)
+output_file = output_dir / "submission.csv"
+sample_sub.to_csv(output_file, index=False)
+print("Salvo em", output_file)
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["Salvo em /tmp/claude-0/-home-claude/aef264ca-6b89-5e64-b26a-863e4b2cbea7/scratchpad/run17b/output/submission.csv\n"]}]
+
+# CELL 37 code
+# Conferências: formato, IDs na ordem do sample_submission, valores entre 0 e 1, impressão digital do arquivo
+check = pd.read_csv(output_file)
+assert list(check.columns) == ["SK_ID_CURR", "TARGET"] and len(check) == len(test)
+assert (check["SK_ID_CURR"].values == pd.read_csv(current_dir / "input" / "sample_submission.csv")["SK_ID_CURR"].values).all()
+assert check["TARGET"].notna().all() and check["TARGET"].between(0, 1).all()
+print("SHA-256:", hashlib.sha256(output_file.read_bytes()).hexdigest())
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["SHA-256: bc62b6095b5a17d949133006277273ee9106ad9f2044376c1bf68763235befba\n"]}]
+
+# CELL 38 markdown
+### Salvar este notebook em ZIP (obrigatório para Honors/Outstanding)
+Salve o notebook antes (Ctrl+S) e confira se `notebook_filename` é o nome deste arquivo.
+
+# CELL 39 code
+import zipfile
+notebook_filename = "gci_home_credit_v17.ipynb"
+notebook_path = current_dir / notebook_filename
+if notebook_path.exists():
+    with zipfile.ZipFile(current_dir / "gci_home_credit_v17.zip", "w", zipfile.ZIP_DEFLATED) as z:
+        z.write(notebook_path, arcname=notebook_filename)
+        z.write(output_file, arcname="submission.csv")
+    print("ZIP criado:", current_dir / "gci_home_credit_v17.zip")
+else:
+    print(f"Não encontrei {notebook_filename} em {current_dir}. Confira o nome/pasta.")
+# OUTPUTS
+[{"name": "stdout", "output_type": "stream", "text": ["ZIP criado: /tmp/claude-0/-home-claude/aef264ca-6b89-5e64-b26a-863e4b2cbea7/scratchpad/run17b/gci_home_credit_v17.zip\n"]}]
+
+# CELL 40 markdown
+## Referências e créditos
+- Material da GCI World 2026: `README.ipynb` (regras) e `tutorial.ipynb` (estrutura, *count encoding*, `OWN_CAR_AGE`, células de submissão).
+- Competição original: [Home Credit Default Risk (Kaggle, 2018)](https://www.kaggle.com/c/home-credit-default-risk). As razões de crédito e o tratamento de `DAYS_EMPLOYED = 365243` são ideias comuns nos notebooks públicos dela.
+- Ideias desenvolvidas neste projeto a partir da análise dos dados: grupos de pedidos da mesma pessoa ("datas fixas"), "tarifas" (razão exata crédito ÷ prestação) e taxas de calote calculadas fora-da-parte.
+- Variáveis ampliadas (seção 2.4) e a ideia de estimar as `EXT_SOURCE` com modelos auxiliares (seção 2.5): vieram de uma revisão feita com o ChatGPT; aqui foram reimplementadas e validadas.
+- *Target encoding* fora-da-parte: técnica clássica, ver [scikit-learn — TargetEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html).
+- Documentação: [LightGBM](https://lightgbm.readthedocs.io/) · [CatBoost](https://catboost.ai/docs/) · [PyTorch](https://pytorch.org/docs/) · [scikit-learn](https://scikit-learn.org/).
+- Código desenvolvido com auxílio de IA generativa (Claude, da Anthropic; e ChatGPT nas versões 8 a 16). Os links das conversas são enviados junto, conforme pedido pelo curso.
