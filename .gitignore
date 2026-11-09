@@ -1,0 +1,32 @@
+# Este repositório contém somente a competição Home Credit.
+/final/
+/entregaveis/final/
+/AGENTS.md
+
+# Ambientes, caches e arquivos locais do sistema.
+.venv/
+.uv-cache/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.mpl-cache/
+.DS_Store
+.env
+.env.*
+
+# Dados oficiais: obter pelo material da competição.
+/competition/input/*
+!/competition/input/README.md
+
+# Cópias de trabalho; os artefatos validados ficam em entregaveis/vNN/.
+/competition/gci_home_credit_*.ipynb
+/competition/gci_home_credit_*.zip
+/competition/output/
+/competition/runs/
+/competition/v[0-9]*/
+/competition/*.log
+
+# Estado local da integração com o Notion.
+/entregaveis/notion.json
+/entregaveis/notion_upload*.json
+/entregaveis/v*/notion.json
