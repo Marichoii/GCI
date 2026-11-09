@@ -1,0 +1,37 @@
+{
+  "source_sha256": "f061b9f6fb6d453cbe0d19463ee886e51276451efd4603d682a80c8a4693c0d3",
+  "original_v17_definitions_preserved": 24,
+  "original_definitions_manifest": "v17_definitions_sha256.json",
+  "training_inputs": [
+    "input/train.csv",
+    "input/test.csv"
+  ],
+  "external_training_data": false,
+  "uses_id_feature": false,
+  "predictions_loaded": false,
+  "threads_per_model": 2,
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds": [
+    2,
+    3,
+    4
+  ],
+  "outer_split": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "candidate_settings_fixed_before_execution": true,
+  "selection_helper_receives_only_folds_0_1_labels": true,
+  "source_not_changed_during_execution": true,
+  "current_library_versions_match_v18_all_69_packages": true,
+  "executed_target_isolation_folds": [
+    0,
+    1
+  ],
+  "experiment_status": "rejected_in_screening"
+}

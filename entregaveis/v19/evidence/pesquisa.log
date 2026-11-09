@@ -1,0 +1,80 @@
+CELL 1 START (0.0s)
+CELL 1 END (3.6s)
+CELL 3 START (3.6s)
+CELL 3 END (7.9s)
+CELL 4 START (7.9s)
+CELL 4 END (7.9s)
+CELL 5 START (7.9s)
+CELL 5 END (7.9s)
+CELL 6 START (7.9s)
+CELL 6 END (7.9s)
+CELL 7 START (7.9s)
+CELL 7 END (7.9s)
+CELL 8 START (7.9s)
+CELL 8 END (7.9s)
+CELL 9 START (7.9s)
+CELL 9 END (7.9s)
+CELL 10 START (7.9s)
+CELL 10 END (7.9s)
+CELL 11 START (7.9s)
+CELL 11 END (7.9s)
+CELL 12 START (7.9s)
+CELL 12 END (7.9s)
+CELL 13 START (7.9s)
+CELL 13 END (7.9s)
+CELL 15 START (7.9s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (7.9s)
+CELL 17 START (7.9s)
+CELL 17 END (8.3s)
+CELL 19 START (8.3s)
+CELL 19 END (8.3s)
+CELL 21 START (8.3s)
+CELL 21 END (8.3s)
+CELL 22 START (8.3s)
+CELL 22 END (8.3s)
+CELL 23 START (8.3s)
+CELL 23 END (8.3s)
+CELL 24 START (8.3s)
+{'base': 74, 'plusx': 142, 'catx': 134} 93s
+LINEAR linear_lambda_10 parte 0: AUC 0.76578093, árvores 329, 14.9s
+LINEAR linear_lambda_100 parte 0: AUC 0.76555161, árvores 507, 19.3s
+BASELINE parte 0: LightGBM B + EXT auxiliares, AUC 0.76792366, 93.7s
+BASELINE parte 0: LightGBM B (variáveis da v7), AUC 0.76646105, 77.7s
+PASS: alterar todos os TARGET da validação não altera nenhum dos 3 frames usados nos quantis da MLP.
+  MLP estrita parte 0, semente 42: época 9
+  MLP estrita parte 0, semente 2024: época 4
+  MLP estrita parte 0, semente 7: época 12
+  MLP estrita parte 0, semente 11: época 10
+  MLP estrita parte 0, semente 99: época 13
+  MLP estrita parte 0, semente 123: época 10
+  MLP estrita parte 0, semente 5: época 7
+  MLP estrita parte 0, semente 77: época 18
+MLP estrita parte 0: AUC 0.76720511
+BASELINE parte 0: Rede neural (MLP, 8 sementes), AUC 0.76720511, 170.3s
+BASELINE parte 0: CatBoost + EXT auxiliares, AUC 0.76897199, 476.8s
+BASELINE TabM parte 0: AUC 0.76809630, época 9
+LINEAR linear_lambda_10 parte 1: AUC 0.77131696, árvores 763, 27.8s
+LINEAR linear_lambda_100 parte 1: AUC 0.77122261, árvores 663, 23.7s
+BASELINE parte 1: LightGBM B + EXT auxiliares, AUC 0.77422517, 139.7s
+BASELINE parte 1: LightGBM B (variáveis da v7), AUC 0.77140376, 91.6s
+  MLP estrita parte 1, semente 42: época 7
+  MLP estrita parte 1, semente 2024: época 12
+  MLP estrita parte 1, semente 7: época 5
+  MLP estrita parte 1, semente 11: época 5
+  MLP estrita parte 1, semente 99: época 12
+  MLP estrita parte 1, semente 123: época 9
+  MLP estrita parte 1, semente 5: época 12
+  MLP estrita parte 1, semente 77: época 11
+MLP estrita parte 1: AUC 0.77146101
+BASELINE parte 1: Rede neural (MLP, 8 sementes), AUC 0.77146101, 154.2s
+BASELINE parte 1: CatBoost + EXT auxiliares, AUC 0.77220419, 492.5s
+BASELINE TabM parte 1: AUC 0.77347002, época 15
+SCREEN {"configuration": {"label": "linear_lambda_10", "linear_lambda": 10.0}, "best": {"alpha": 0.0, "auc": 0.772720545576815}, "grid": [{"alpha": 0.0, "auc": 0.772720545576815}, {"alpha": 0.025, "auc": 0.7726980987578842}, {"alpha": 0.05, "auc": 0.7726738879114577}, {"alpha": 0.075, "auc": 0.7726447757117617}, {"alpha": 0.1, "auc": 0.7726106759685274}, {"alpha": 0.125, "auc": 0.772575182815952}, {"alpha": 0.15, "auc": 0.7725332397582827}, {"alpha": 0.175, "auc": 0.7724827322609318}, {"alpha": 0.2, "auc": 0.7724305296882997}, {"alpha": 0.225, "auc": 0.7723781288780502}, {"alpha": 0.25, "auc": 0.7723160230435657}, {"alpha": 0.275, "auc": 0.7722506592169316}, {"alpha": 0.3, "auc": 0.7721816581609656}], "baseline_auc": 0.772720545576815, "delta": 0.0}
+SCREEN {"configuration": {"label": "linear_lambda_100", "linear_lambda": 100.0}, "best": {"alpha": 0.0, "auc": 0.772720545576815}, "grid": [{"alpha": 0.0, "auc": 0.772720545576815}, {"alpha": 0.025, "auc": 0.7726891895571284}, {"alpha": 0.05, "auc": 0.772654980639554}, {"alpha": 0.075, "auc": 0.7726224351941622}, {"alpha": 0.1, "auc": 0.7725793486789303}, {"alpha": 0.125, "auc": 0.7725291629585818}, {"alpha": 0.15, "auc": 0.7724795748240949}, {"alpha": 0.175, "auc": 0.7724247779243808}, {"alpha": 0.2, "auc": 0.7723641315784433}, {"alpha": 0.225, "auc": 0.7723040339772151}, {"alpha": 0.25, "auc": 0.7722381041678175}, {"alpha": 0.275, "auc": 0.7721684135897035}, {"alpha": 0.3, "auc": 0.7720917703299292}], "baseline_auc": 0.772720545576815, "delta": 0.0}
+Status final: rejected_in_screening ; nenhum CSV novo escrito.
+CELL 24 END (2289.9s)
+EXECUTION FINISHED pesquisa_linear_01

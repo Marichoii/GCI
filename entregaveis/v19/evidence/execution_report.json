@@ -1,0 +1,227 @@
+{
+  "status": "rejected_in_screening",
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0"
+  },
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "threads": 2,
+  "configurations": [
+    {
+      "label": "linear_lambda_10",
+      "linear_lambda": 10.0
+    },
+    {
+      "label": "linear_lambda_100",
+      "linear_lambda": 100.0
+    }
+  ],
+  "alpha_grid": [
+    0.0,
+    0.025,
+    0.05,
+    0.075,
+    0.1,
+    0.125,
+    0.15,
+    0.175,
+    0.2,
+    0.225,
+    0.25,
+    0.275,
+    0.3
+  ],
+  "baseline_weights": [
+    0.19875,
+    0.03825,
+    0.2235,
+    0.2895,
+    0.25
+  ],
+  "screening": [
+    {
+      "configuration": {
+        "label": "linear_lambda_10",
+        "linear_lambda": 10.0
+      },
+      "best": {
+        "alpha": 0.0,
+        "auc": 0.772720545576815
+      },
+      "grid": [
+        {
+          "alpha": 0.0,
+          "auc": 0.772720545576815
+        },
+        {
+          "alpha": 0.025,
+          "auc": 0.7726980987578842
+        },
+        {
+          "alpha": 0.05,
+          "auc": 0.7726738879114577
+        },
+        {
+          "alpha": 0.075,
+          "auc": 0.7726447757117617
+        },
+        {
+          "alpha": 0.1,
+          "auc": 0.7726106759685274
+        },
+        {
+          "alpha": 0.125,
+          "auc": 0.772575182815952
+        },
+        {
+          "alpha": 0.15,
+          "auc": 0.7725332397582827
+        },
+        {
+          "alpha": 0.175,
+          "auc": 0.7724827322609318
+        },
+        {
+          "alpha": 0.2,
+          "auc": 0.7724305296882997
+        },
+        {
+          "alpha": 0.225,
+          "auc": 0.7723781288780502
+        },
+        {
+          "alpha": 0.25,
+          "auc": 0.7723160230435657
+        },
+        {
+          "alpha": 0.275,
+          "auc": 0.7722506592169316
+        },
+        {
+          "alpha": 0.3,
+          "auc": 0.7721816581609656
+        }
+      ],
+      "baseline_auc": 0.772720545576815,
+      "delta": 0.0
+    },
+    {
+      "configuration": {
+        "label": "linear_lambda_100",
+        "linear_lambda": 100.0
+      },
+      "best": {
+        "alpha": 0.0,
+        "auc": 0.772720545576815
+      },
+      "grid": [
+        {
+          "alpha": 0.0,
+          "auc": 0.772720545576815
+        },
+        {
+          "alpha": 0.025,
+          "auc": 0.7726891895571284
+        },
+        {
+          "alpha": 0.05,
+          "auc": 0.772654980639554
+        },
+        {
+          "alpha": 0.075,
+          "auc": 0.7726224351941622
+        },
+        {
+          "alpha": 0.1,
+          "auc": 0.7725793486789303
+        },
+        {
+          "alpha": 0.125,
+          "auc": 0.7725291629585818
+        },
+        {
+          "alpha": 0.15,
+          "auc": 0.7724795748240949
+        },
+        {
+          "alpha": 0.175,
+          "auc": 0.7724247779243808
+        },
+        {
+          "alpha": 0.2,
+          "auc": 0.7723641315784433
+        },
+        {
+          "alpha": 0.225,
+          "auc": 0.7723040339772151
+        },
+        {
+          "alpha": 0.25,
+          "auc": 0.7722381041678175
+        },
+        {
+          "alpha": 0.275,
+          "auc": 0.7721684135897035
+        },
+        {
+          "alpha": 0.3,
+          "auc": 0.7720917703299292
+        }
+      ],
+      "baseline_auc": 0.772720545576815,
+      "delta": 0.0
+    }
+  ],
+  "confirmed": false,
+  "csv_sha256": null,
+  "source_note": "All models refit from input CSVs in this process.",
+  "seconds": 2188.3336849212646,
+  "last_completed_fold": 1,
+  "screen_table": [
+    {
+      "parte": 0,
+      "configuration": "linear_lambda_10",
+      "v18": 0.7703168812714054,
+      "v19": 0.7703168812714054,
+      "delta": 0.0
+    },
+    {
+      "parte": 0,
+      "configuration": "linear_lambda_100",
+      "v18": 0.7703168812714054,
+      "v19": 0.7703168812714054,
+      "delta": 0.0
+    },
+    {
+      "parte": 1,
+      "configuration": "linear_lambda_10",
+      "v18": 0.7753480535817411,
+      "v19": 0.7753480535817411,
+      "delta": 0.0
+    },
+    {
+      "parte": 1,
+      "configuration": "linear_lambda_100",
+      "v18": 0.7753480535817411,
+      "v19": 0.7753480535817411,
+      "delta": 0.0
+    }
+  ],
+  "reason": "Neither configuration improves the v18 ensemble on folds 0–1; folds 2–4 not run.",
+  "total_seconds_including_prepare": 2281.58425283432,
+  "run_cv": true,
+  "cv_only": true
+}

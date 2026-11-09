@@ -1,0 +1,17 @@
+{
+  "PLANO.md": "4a63539c3c15f9bb79d9ba0a1ad9eb49a137cb3f607556c30d64383d1b5a37cb",
+  "RESULTADOS_v19.md": "a07f20e2f8c9cc83d0a5cf9bb2c8125d4ae890e5ed77b380d09bec745c0cd074",
+  "build_v19_experiment.py": "07b845eccc0bd5b9e53c44f81f44ab4d51eb39a83356f8153231680ac2d8f93a",
+  "evidence/executed.ipynb": "12230f031735e7930025e76706e665f8ffc766787f6dbe54ef97b26c20ff06a3",
+  "evidence/execution_report.json": "94fe75d2462b444296b741a341f2e923a09f73751a0f252f732d0d363a7db585",
+  "evidence/experiment_report.json": "ccb1b3efb1a9ea69ff8754d4e27bfd3f915972c4539671c91029f9e469428278",
+  "evidence/pesquisa.log": "2620da017cedf1e8bae4f5fc5144cd3c5e581e6046c634231e7f89fc52cdfb25",
+  "evidence/source_audit.json": "515b4cde1351ceecaf71e40d4df4af63f01073f019ea2232fd4d9251601ceb7b",
+  "execute_notebook.py": "d22f68f6dd88ae4a5ccf10880ee4fbd391a476b38c3063627f54ef9b71f33990",
+  "gci_home_credit_v19.zip": "2536070a349ad96a79bb693e4a041b8689c7a9f07f54a3d4af6db4f37df8e64d",
+  "gci_home_credit_v19_pesquisa.ipynb": "f061b9f6fb6d453cbe0d19463ee886e51276451efd4603d682a80c8a4693c0d3",
+  "installed_versions_local.txt": "ffab215e96eb7a467edeb1d9a7ede6d6c8800d56514bc62c6597c402b20efe37",
+  "requirements.txt": "d3968bccf2644d029d69c0e45da913e338e7af8a0ce2d830b1e25934f90708ba",
+  "v17_definitions_sha256.json": "f0220f1b39d1828954098c502521da9e1e6d0c9c9dd074e0ef040512c93650ec",
+  "v19_linear.py": "e77450c1b9e41014c53bcc6e9beba04d04555774fc6a6d2e63ed30190a872ace"
+}
