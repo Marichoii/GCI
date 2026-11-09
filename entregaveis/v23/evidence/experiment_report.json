@@ -1,0 +1,461 @@
+{
+  "status": "rejected_in_confirmation",
+  "confirmed": false,
+  "csv_sha256": null,
+  "hypothesis": "Fixed v21 weights; convex blend of current rank-squared score and rank-squared weighted log-odds score.",
+  "weights": [
+    0.156571875,
+    0.005900625,
+    0.21094875,
+    0.17445374999999996,
+    0.194625,
+    0.15750000000000003,
+    0.1
+  ],
+  "alpha_grid": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds_executed": [
+    2,
+    3,
+    4
+  ],
+  "fold_results": [
+    {
+      "fold": 0,
+      "seconds": 2143.863301753998,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    },
+    {
+      "fold": 1,
+      "seconds": 2437.134850025177,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    },
+    {
+      "fold": 2,
+      "seconds": 2675.6403119564056,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    },
+    {
+      "fold": 3,
+      "seconds": 2166.8906519412994,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    },
+    {
+      "fold": 4,
+      "seconds": 1782.7089622020721,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    }
+  ],
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "exact_installed_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0",
+    "joblib": "1.6.0"
+  },
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "cv_workers": 2,
+  "threads_per_model": 2,
+  "source_note": "Refit all seven v21 components; no saved predictions, OOFs, checkpoints or models loaded. Original v17 unlabeled train+test preprocessing preserved.",
+  "seconds": 6401.434871196747,
+  "screening_baseline_auc": 0.7730026262146088,
+  "screening_grid": [
+    {
+      "alpha": 0.0,
+      "auc": 0.7730026262146088
+    },
+    {
+      "alpha": 0.1,
+      "auc": 0.7730152473429285
+    },
+    {
+      "alpha": 0.2,
+      "auc": 0.7730255930481595
+    },
+    {
+      "alpha": 0.3,
+      "auc": 0.7730361915781782
+    },
+    {
+      "alpha": 0.4,
+      "auc": 0.773046313188711
+    },
+    {
+      "alpha": 0.5,
+      "auc": 0.7730557998642659
+    },
+    {
+      "alpha": 0.6,
+      "auc": 0.773065967442942
+    },
+    {
+      "alpha": 0.7,
+      "auc": 0.7730744916604982
+    },
+    {
+      "alpha": 0.8,
+      "auc": 0.7730818207063312
+    },
+    {
+      "alpha": 0.9,
+      "auc": 0.7730894801481933
+    },
+    {
+      "alpha": 1.0,
+      "auc": 0.7730963926077284
+    }
+  ],
+  "screening_choice": {
+    "alpha": 1.0,
+    "auc": 0.7730963926077284
+  },
+  "alpha": 1.0,
+  "final_selection_grid": [
+    {
+      "alpha": 0.0,
+      "auc": 0.773007133965652
+    },
+    {
+      "alpha": 0.1,
+      "auc": 0.773018648985526
+    },
+    {
+      "alpha": 0.2,
+      "auc": 0.7730312729868549
+    },
+    {
+      "alpha": 0.3,
+      "auc": 0.7730403775522192
+    },
+    {
+      "alpha": 0.4,
+      "auc": 0.7730496315140489
+    },
+    {
+      "alpha": 0.5,
+      "auc": 0.7730586872382611
+    },
+    {
+      "alpha": 0.6,
+      "auc": 0.7730676366611422
+    },
+    {
+      "alpha": 0.7,
+      "auc": 0.7730761091645375
+    },
+    {
+      "alpha": 0.8,
+      "auc": 0.7730826165298104
+    },
+    {
+      "alpha": 0.9,
+      "auc": 0.7730901610513147
+    },
+    {
+      "alpha": 1.0,
+      "auc": 0.7730963926077284
+    }
+  ],
+  "iterations": [
+    [
+      728,
+      1077,
+      1247,
+      1750,
+      1607,
+      1621,
+      1241,
+      1707,
+      1957,
+      1372,
+      1478,
+      1348,
+      1356,
+      1394,
+      1589
+    ],
+    [
+      1298,
+      1334,
+      1525,
+      1796,
+      1671,
+      1628,
+      1655,
+      1962,
+      1332,
+      1748,
+      1451,
+      1583,
+      1458,
+      1361,
+      1586
+    ],
+    [
+      9,
+      4,
+      12,
+      10,
+      13,
+      10,
+      7,
+      18,
+      7,
+      12,
+      5,
+      5,
+      12,
+      9,
+      12,
+      11,
+      9,
+      8,
+      10,
+      14,
+      11,
+      9,
+      14,
+      6,
+      9,
+      4,
+      7,
+      13,
+      8,
+      9,
+      8,
+      11,
+      13,
+      13,
+      9,
+      9,
+      10,
+      7,
+      7,
+      17
+    ],
+    [
+      609,
+      1180,
+      946,
+      911,
+      1321,
+      1071,
+      646,
+      890,
+      1170,
+      847
+    ],
+    [
+      9,
+      15,
+      15,
+      8,
+      12
+    ],
+    [
+      5,
+      15,
+      10,
+      8,
+      10
+    ],
+    [
+      884,
+      1230,
+      991,
+      916,
+      712
+    ]
+  ],
+  "final_sizes": [
+    1646,
+    1793,
+    11,
+    1103,
+    14,
+    11,
+    1089
+  ],
+  "table": [
+    {
+      "parte": "parte_0",
+      "linhas": 34241,
+      "v21": 0.7703993962099541,
+      "v23": 0.7704583026119685,
+      "delta": 5.8906402014335946e-05
+    },
+    {
+      "parte": "parte_1",
+      "linhas": 34241,
+      "v21": 0.7756142111892365,
+      "v23": 0.7757141064680987,
+      "delta": 9.98952788622276e-05
+    },
+    {
+      "parte": "parte_2",
+      "linhas": 34240,
+      "v21": 0.7786825475555861,
+      "v23": 0.7785446274826991,
+      "delta": -0.0001379200728869323
+    },
+    {
+      "parte": "parte_3",
+      "linhas": 34240,
+      "v21": 0.7712746338882412,
+      "v23": 0.7712576453168831,
+      "delta": -1.698857135812304e-05
+    },
+    {
+      "parte": "parte_4",
+      "linhas": 34240,
+      "v21": 0.7745475200915718,
+      "v23": 0.7744303587195462,
+      "delta": -0.00011716137202555377
+    },
+    {
+      "parte": "partes_0_1",
+      "linhas": 68482,
+      "v21": 0.773007133965652,
+      "v23": 0.7730963926077284,
+      "delta": 8.925864207642853e-05
+    },
+    {
+      "parte": "partes_2_4",
+      "linhas": 102720,
+      "v21": 0.7747809092432562,
+      "v23": 0.7746964593641036,
+      "delta": -8.444987915257052e-05
+    },
+    {
+      "parte": "total",
+      "linhas": 171202,
+      "v21": 0.7740567649584406,
+      "v23": 0.7740375080090385,
+      "delta": -1.9256949402080004e-05
+    }
+  ],
+  "seconds_including_prepare": 6459.4644429683685,
+  "run_cv": true,
+  "cv_only": true
+}

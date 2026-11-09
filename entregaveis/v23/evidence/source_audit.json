@@ -1,0 +1,23 @@
+{
+  "original_definitions_verified": 24,
+  "source_sha256": "d25ee2d824b7f0b591ad6a1701ef28ac257d41fccd7da795247816fbbec70a6d",
+  "threads": 2,
+  "cv_workers": 2,
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds": [
+    2,
+    3,
+    4
+  ],
+  "seed": 42,
+  "full_reproduction_not_executed": true,
+  "final_status": "rejected_in_confirmation",
+  "confirmation_folds_executed": [
+    2,
+    3,
+    4
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "status": "completing_oof",
+  "confirmed": false,
+  "csv_sha256": null,
+  "hypothesis": "Fixed v21 weights; convex blend of current rank-squared score and rank-squared weighted log-odds score.",
+  "weights": [
+    0.156571875,
+    0.005900625,
+    0.21094875,
+    0.17445374999999996,
+    0.194625,
+    0.15750000000000003,
+    0.1
+  ],
+  "alpha_grid": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds_executed": [],
+  "fold_results": [
+    {
+      "fold": 0,
+      "seconds": 2143.863301753998,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    },
+    {
+      "fold": 1,
+      "seconds": 2437.134850025177,
+      "threads": 2,
+      "threadpools": [
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/torch/lib/libomp.dylib",
+          "version": null
+        },
+        {
+          "user_api": "openmp",
+          "internal_api": "openmp",
+          "num_threads": 2,
+          "prefix": "libomp",
+          "filepath": "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/sklearn/.dylibs/libomp.dylib",
+          "version": null
+        }
+      ],
+      "torch_interop_pool": 2
+    }
+  ],
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "exact_installed_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0",
+    "joblib": "1.6.0"
+  },
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "cv_workers": 2,
+  "threads_per_model": 2,
+  "source_note": "Refit all seven v21 components; no saved predictions, OOFs, checkpoints or models loaded. Original v17 unlabeled train+test preprocessing preserved.",
+  "seconds": 2442.3199470043182,
+  "screening_baseline_auc": 0.7730026262146088,
+  "screening_grid": [
+    {
+      "alpha": 0.0,
+      "auc": 0.7730026262146088
+    },
+    {
+      "alpha": 0.1,
+      "auc": 0.7730152473429285
+    },
+    {
+      "alpha": 0.2,
+      "auc": 0.7730255930481595
+    },
+    {
+      "alpha": 0.3,
+      "auc": 0.7730361915781782
+    },
+    {
+      "alpha": 0.4,
+      "auc": 0.773046313188711
+    },
+    {
+      "alpha": 0.5,
+      "auc": 0.7730557998642659
+    },
+    {
+      "alpha": 0.6,
+      "auc": 0.773065967442942
+    },
+    {
+      "alpha": 0.7,
+      "auc": 0.7730744916604982
+    },
+    {
+      "alpha": 0.8,
+      "auc": 0.7730818207063312
+    },
+    {
+      "alpha": 0.9,
+      "auc": 0.7730894801481933
+    },
+    {
+      "alpha": 1.0,
+      "auc": 0.7730963926077284
+    }
+  ],
+  "screening_choice": {
+    "alpha": 1.0,
+    "auc": 0.7730963926077284
+  }
+}
