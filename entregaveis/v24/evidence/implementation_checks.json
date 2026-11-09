@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "FM equals explicit pairwise interactions",
+    "FM analytical gradient",
+    "held-out covariates do not alter FM training transforms; unknown category accepted",
+    "two-level large counts are normalized; only genuine zero-one flags bypass quantiles",
+    "stratum counts exclude each evaluated row and its outer fold",
+    "fixed alpha grid; tie chooses zero; v21 proportions preserved",
+    "no prediction/model loader in FM module; frozen protocol matches notebook"
+  ],
+  "passed": true,
+  "real_competition_model_training_executed": false,
+  "source_sha256": "3907623f89aee0d9f1838b8f36db1b654c793d8a3ea51807221e3f12e09acb07"
+}

@@ -1,0 +1,113 @@
+CELL 1 START (0.0s)
+CELL 1 END (0.6s)
+CELL 3 START (0.6s)
+CELL 3 END (1.4s)
+CELL 4 START (1.4s)
+CELL 4 END (1.4s)
+CELL 5 START (1.4s)
+CELL 5 END (1.4s)
+CELL 6 START (1.4s)
+CELL 6 END (1.4s)
+CELL 7 START (1.4s)
+CELL 7 END (1.4s)
+CELL 8 START (1.4s)
+CELL 8 END (1.4s)
+CELL 9 START (1.4s)
+CELL 9 END (1.4s)
+CELL 10 START (1.4s)
+CELL 10 END (1.4s)
+CELL 11 START (1.4s)
+CELL 11 END (1.4s)
+CELL 12 START (1.4s)
+CELL 12 END (1.4s)
+CELL 13 START (1.4s)
+CELL 13 END (1.4s)
+CELL 15 START (1.4s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (1.4s)
+CELL 17 START (1.4s)
+CELL 17 END (1.5s)
+CELL 19 START (1.5s)
+CELL 19 END (1.5s)
+CELL 21 START (1.5s)
+CELL 21 END (1.5s)
+CELL 22 START (1.5s)
+CELL 22 END (1.5s)
+CELL 23 START (1.5s)
+CELL 23 END (1.5s)
+CELL 24 START (1.5s)
+CELL 24 END (1.5s)
+CELL 25 START (1.5s)
+CELL 25 END (1.5s)
+CELL 26 START (1.5s)
+CELL 26 END (1.6s)
+CELL 27 START (1.6s)
+Protocolo e estratos congelados antes de prepare/fit 02f9588325cc88f8d2d57d83b1cb58108a96ac20c04dd0141e08c1646da3fe5e
+muito_frequentes_200_mais    99603
+comuns_50_199                47841
+pouco_frequentes_10_49       19524
+raras_0_9                     4234
+{'base': 74, 'plusx': 142, 'catx': 134} 48s
+V24 parte 0 iniciada
+V24 parte 1 iniciada
+FM inner época 1: AUC 0.62459654
+FM inner época 1: AUC 0.61936122
+FM inner época 2: AUC 0.62381460
+FM inner época 3: AUC 0.62488380
+FM inner época 4: AUC 0.69336884
+FM inner época 2: AUC 0.62054775
+FM inner época 5: AUC 0.62700348
+FM inner época 6: AUC 0.62969449
+FM inner época 3: AUC 0.62135472
+FM inner época 7: AUC 0.66803574
+FM inner época 8: AUC 0.60381194
+FM inner época 9: AUC 0.62558306
+FM inner época 4: AUC 0.62481433
+FM inner época 10: AUC 0.62587306
+FM inner época 5: AUC 0.62471385
+FM inner época 6: AUC 0.65915703
+FM inner época 7: AUC 0.71838227
+FM inner época 8: AUC 0.62979363
+FM inner época 9: AUC 0.62573807
+FM inner época 10: AUC 0.62438783
+FM inner época 11: AUC 0.62390526
+FM inner época 12: AUC 0.62523538
+FM inner época 13: AUC 0.62521040
+FM parte 0: AUC 0.71212829, épocas 4
+PARTE 0 iniciada; candidatos [0]
+FM parte 1: AUC 0.62620075, épocas 7
+PARTE 1 iniciada; candidatos [0]
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 728
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 1750
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1077
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1247
+BASELINE parte 0: LightGBM B + EXT auxiliares, AUC 0.76792366, 61.2s
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1607
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1298
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1621
+BASELINE parte 1: LightGBM B + EXT auxiliares, AUC 0.77422517, 92.2s
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1334
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1525
+BASELINE parte 0: LightGBM B (variáveis da v7), AUC 0.76646105, 52.8s
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1796
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1671
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1628
+BASELINE parte 1: LightGBM B (variáveis da v7), AUC 0.77140376, 66.6s
+Traceback (most recent call last):
+  File "/Users/eguchi/GCI/competition/v24/../execute_notebook.py", line 79, in <module>
+    main()
+  File "/Users/eguchi/GCI/competition/v24/../execute_notebook.py", line 56, in main
+    exec(compile("".join(cell["source"]), f"{path.name}:cell_{i}", "exec"), namespace)
+  File "gci_home_credit_v24_pesquisa.ipynb:cell_27", line 20, in <module>
+  File "gci_home_credit_v24_pesquisa.ipynb:cell_26", line 317, in v24_run
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 2098, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 1704, in _get_outputs
+    yield from self._retrieve()
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 1822, in _retrieve
+    time.sleep(0.01)
+KeyboardInterrupt

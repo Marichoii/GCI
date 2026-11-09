@@ -1,0 +1,13 @@
+{
+  "hyperparameters_seeds_weights_strata_and_promotion_unchanged": true,
+  "changed_functions": [
+    "v24_preprocess"
+  ],
+  "protocol_added_fields": [
+    "implementation_revision",
+    "fm.binary_numeric"
+  ],
+  "strata_identical_bytes": true,
+  "strata_sha256": "a7bbecf8d7619d862e89c74da0b16601f9d3a155eb49e80caf7f73ff5e0740a9",
+  "corrected_notebook_sha256": "3907623f89aee0d9f1838b8f36db1b654c793d8a3ea51807221e3f12e09acb07"
+}

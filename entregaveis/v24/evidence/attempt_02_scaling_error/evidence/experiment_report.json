@@ -1,0 +1,151 @@
+{
+  "status": "running_selection",
+  "confirmed": false,
+  "csv_sha256": null,
+  "protocol": {
+    "version": "v24",
+    "hypothesis": "PyTorch second-order factorization machine",
+    "deadline": "2026-11-14",
+    "seed": 42,
+    "threads_per_model": 2,
+    "cv_workers": 2,
+    "folds": {
+      "n_splits": 5,
+      "shuffle": true,
+      "random_state": 42
+    },
+    "selection_folds": [
+      0,
+      1
+    ],
+    "confirmation_folds": [
+      2,
+      3,
+      4
+    ],
+    "alpha_grid": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2
+    ],
+    "tie_break": "smaller_alpha",
+    "baseline_weights": [
+      0.156571875,
+      0.005900625,
+      0.21094875,
+      0.17445374999999996,
+      0.194625,
+      0.15750000000000003,
+      0.1
+    ],
+    "baseline_final_sizes": [
+      1646,
+      1793,
+      11,
+      1103,
+      14,
+      11,
+      1089
+    ],
+    "fm": {
+      "feature_set": "plusx",
+      "rank": 16,
+      "linear": true,
+      "loss": "unweighted_BCE",
+      "optimizer": "AdamW",
+      "lr": 0.002,
+      "weight_decay": 0.001,
+      "batch_size": 2048,
+      "max_epochs": 40,
+      "patience": 6,
+      "min_delta": 1e-06,
+      "inner_fraction": 0.15,
+      "inner_random_state": 42,
+      "factor_init_std": 0.01,
+      "linear_init": "zero",
+      "bias_init": "logit_of_training_prevalence",
+      "model_seed": 42,
+      "quantiles": 256,
+      "quantile_distribution": "normal",
+      "clip": 4.0,
+      "categorical": "dense_one_hot_unknown_ignore",
+      "missing": "zero_numeric_plus_training_missing_indicators",
+      "constant_columns": "drop_by_training_only",
+      "epoch_selection": "inner_AUC_then_refit_all_outer_training_from_scratch",
+      "final_epochs": "rounded_mean_of_outer_inner_selected_epochs_no_multiplier"
+    },
+    "strata": {
+      "key": "round(AMT_CREDIT / AMT_ANNUITY, 2)",
+      "decimals": 2,
+      "count_source": "outer_training_only_excluding_evaluated_fold",
+      "bins": [
+        [
+          0,
+          9
+        ],
+        [
+          10,
+          49
+        ],
+        [
+          50,
+          199
+        ],
+        [
+          200,
+          null
+        ]
+      ],
+      "names": [
+        "raras_0_9",
+        "pouco_frequentes_10_49",
+        "comuns_50_199",
+        "muito_frequentes_200_mais"
+      ],
+      "invalid": "missing_nonfinite_or_nonpositive_credit_or_annuity",
+      "use": "diagnostics_only_never_feature_weight_or_prediction_rule"
+    },
+    "rank_procedure": "screen_on_0_1_ranks_then_if_pass_reselect_same_grid_with_global_ranks_using_only_labels_0_1",
+    "screening": "stop_if_best_alpha_zero_or_no_positive_gain_on_0_1",
+    "promotion": {
+      "min_delta_2_4": 0.0001,
+      "total_delta_strictly_positive": true,
+      "reference_2_4": 0.7747809092432562,
+      "reference_total": 0.7740567649584406
+    },
+    "final_limit_seconds": 3600,
+    "no_prediction_or_model_loading": true,
+    "note": "Inherited v21 unlabeled train+test preprocessing and v21 early stopping are preserved for exact comparison. New FM epoch selection uses an inner split."
+  },
+  "protocol_sha256": "02f9588325cc88f8d2d57d83b1cb58108a96ac20c04dd0141e08c1646da3fe5e",
+  "frozen_strata_sha256": "a7bbecf8d7619d862e89c74da0b16601f9d3a155eb49e80caf7f73ff5e0740a9",
+  "input_sha256": {
+    "train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "exact_installed_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "torch": "2.6.0",
+    "tabm": "0.0.3",
+    "rtdl-num-embeddings": "0.0.12",
+    "threadpoolctl": "3.6.0",
+    "joblib": "1.6.0"
+  },
+  "python": "3.11.15 (main, Mar  3 2026, 00:52:57) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "fold_results": [],
+  "confirmation_folds_executed": [],
+  "selection_folds": [
+    0,
+    1
+  ],
+  "source_note": "All seven v21 components and FM refit from input; no saved predictions or models loaded.",
+  "seconds": 0.16944313049316406
+}

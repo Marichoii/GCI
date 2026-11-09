@@ -1,0 +1,17 @@
+{
+  "status": "invalid_implementation",
+  "reason": "Two-level count features incorrectly left unscaled as binary flags",
+  "counts": {
+    "NAME_CONTRACT_TYPE_COUNT": [
+      21920,
+      210782
+    ],
+    "CODE_GENDER_COUNT": [
+      80233,
+      152465
+    ]
+  },
+  "no_alpha_selection_executed": true,
+  "no_confirmation_executed": true,
+  "hyperparameters_unchanged_in_repair": true
+}

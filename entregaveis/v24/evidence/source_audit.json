@@ -1,0 +1,22 @@
+{
+  "original_definitions_verified": 24,
+  "research_source_sha256": "3907623f89aee0d9f1838b8f36db1b654c793d8a3ea51807221e3f12e09acb07",
+  "protocol_sha256": "a12da7b39a7d6649831dc41f4972e96bfedd0d4b4a2b319b34928f1abd25a6fc",
+  "fm_module_sha256": "92cabaad81c048913ea8fef554c7e513bb17fdaef9b1009b117c8ca4a7106055",
+  "frozen_before_training": true,
+  "cv_workers": 2,
+  "threads_per_model": 2,
+  "full_reproduction_not_executed": true,
+  "no_new_dependencies": true,
+  "implementation_revision": 2,
+  "previous_attempt_invalid": true,
+  "implementation_repair": "normalize two-level counts; only true 0/1 flags skip quantiles",
+  "frozen_before_valid_training": true,
+  "final_status": "rejected_in_screening",
+  "confirmation_folds_executed": [],
+  "completed_outer_folds": [
+    0,
+    1
+  ],
+  "target_flip_audits_passed": true
+}

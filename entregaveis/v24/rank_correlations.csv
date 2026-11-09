@@ -1,0 +1,22 @@
+parte,componente,spearman
+parte_0,LightGBM B + EXT,0.95758255263912051
+parte_0,LightGBM B v7,0.94620260041741477
+parte_0,MLP 8 sementes,0.95958542060588525
+parte_0,CatBoost Plain + EXT,0.95346639165841718
+parte_0,TabM periódico,0.95174414106051985
+parte_0,TabM por pares,0.9506093533937644
+parte_0,CatBoost Ordered depth 5,0.94982741401958592
+parte_1,LightGBM B + EXT,0.94961422751443092
+parte_1,LightGBM B v7,0.94439148704407483
+parte_1,MLP 8 sementes,0.95474413602441621
+parte_1,CatBoost Plain + EXT,0.9505990062867532
+parte_1,TabM periódico,0.94348532534351104
+parte_1,TabM por pares,0.92664983066337725
+parte_1,CatBoost Ordered depth 5,0.94444424910826363
+partes_0_1,LightGBM B + EXT,0.95069149199804659
+partes_0_1,LightGBM B v7,0.94223034677353357
+partes_0_1,MLP 8 sementes,0.95241428482561796
+partes_0_1,CatBoost Plain + EXT,0.94856503996824149
+partes_0_1,TabM periódico,0.9326185233551475
+partes_0_1,TabM por pares,0.93272310252062274
+partes_0_1,CatBoost Ordered depth 5,0.94430434555420995

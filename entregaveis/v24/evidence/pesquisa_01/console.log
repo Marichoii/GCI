@@ -1,0 +1,110 @@
+CELL 1 START (0.0s)
+CELL 1 END (0.6s)
+CELL 3 START (0.6s)
+CELL 3 END (1.7s)
+CELL 4 START (1.7s)
+CELL 4 END (1.7s)
+CELL 5 START (1.7s)
+CELL 5 END (1.7s)
+CELL 6 START (1.7s)
+CELL 6 END (1.7s)
+CELL 7 START (1.7s)
+CELL 7 END (1.7s)
+CELL 8 START (1.7s)
+CELL 8 END (1.7s)
+CELL 9 START (1.7s)
+CELL 9 END (1.7s)
+CELL 10 START (1.7s)
+CELL 10 END (1.7s)
+CELL 11 START (1.7s)
+CELL 11 END (1.7s)
+CELL 12 START (1.7s)
+CELL 12 END (1.7s)
+CELL 13 START (1.7s)
+CELL 13 END (1.7s)
+CELL 15 START (1.7s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (1.7s)
+CELL 17 START (1.7s)
+CELL 17 END (1.9s)
+CELL 19 START (1.9s)
+CELL 19 END (1.9s)
+CELL 21 START (1.9s)
+CELL 21 END (1.9s)
+CELL 22 START (1.9s)
+CELL 22 END (1.9s)
+CELL 23 START (1.9s)
+CELL 23 END (1.9s)
+CELL 24 START (1.9s)
+CELL 24 END (1.9s)
+CELL 25 START (1.9s)
+CELL 25 END (1.9s)
+CELL 26 START (1.9s)
+CELL 26 END (1.9s)
+CELL 27 START (1.9s)
+Protocolo e estratos congelados antes de prepare/fit 02f9588325cc88f8d2d57d83b1cb58108a96ac20c04dd0141e08c1646da3fe5e
+muito_frequentes_200_mais    99603
+comuns_50_199                47841
+pouco_frequentes_10_49       19524
+raras_0_9                     4234
+{'base': 74, 'plusx': 142, 'catx': 134} 50s
+OMP: Error #179: Function Can't open SHM failed:
+OMP: System error #0: Undefined error: 0
+OMP: Error #179: Function Can't open SHM failed:
+OMP: System error #0: Undefined error: 0
+Exception in thread ExecutorManagerThread:
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.11/3.11.15_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/externals/loky/process_executor.py", line 626, in run
+    self.terminate_broken(bpe)
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/externals/loky/process_executor.py", line 845, in terminate_broken
+    self.kill_workers(reason="broken executor")
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/externals/loky/process_executor.py", line 878, in kill_workers
+    kill_process_tree(p)
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/externals/loky/backend/utils.py", line 19, in kill_process_tree
+    _kill_process_tree_with_psutil(process)
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/externals/loky/backend/utils.py", line 35, in _kill_process_tree_with_psutil
+    descendants = psutil.Process(process.pid).children(recursive=True)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/psutil/__init__.py", line 978, in children
+    ppid_map = _ppid_map()
+               ^^^^^^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/psutil/__init__.py", line 256, in _ppid_map
+    for pid in pids():
+               ^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/psutil/__init__.py", line 1485, in pids
+    ret = sorted(_psplatform.pids())
+                 ^^^^^^^^^^^^^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/psutil/_psosx.py", line 320, in pids
+    ls = cext.pids()
+         ^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted (originated from sysctl() malloc 1/3)
+Traceback (most recent call last):
+  File "/Users/eguchi/GCI/competition/v24/../execute_notebook.py", line 79, in <module>
+    main()
+  File "/Users/eguchi/GCI/competition/v24/../execute_notebook.py", line 56, in main
+    exec(compile("".join(cell["source"]), f"{path.name}:cell_{i}", "exec"), namespace)
+  File "gci_home_credit_v24_pesquisa.ipynb:cell_27", line 20, in <module>
+  File "gci_home_credit_v24_pesquisa.ipynb:cell_26", line 317, in v24_run
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 2098, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 1704, in _get_outputs
+    yield from self._retrieve()
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 1806, in _retrieve
+    self._raise_error_fast()
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 1885, in _raise_error_fast
+    error_job.get_result(self.timeout)
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 780, in get_result
+    return self._return_or_raise()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eguchi/GCI/.venv/lib/python3.11/site-packages/joblib/parallel.py", line 795, in _return_or_raise
+    raise self._result
+joblib.externals.loky.process_executor.TerminatedWorkerError: A worker process managed by the executor was unexpectedly terminated. This could be caused by a segmentation fault while calling the function or by an excessive memory usage causing the Operating System to kill the worker.
+
+The exit codes of the workers are {SIGABRT(-6)}
+Detailed tracebacks of the workers should have been printed to stderr in the executor process if faulthandler was not disabled.

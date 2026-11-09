@@ -1,0 +1,7 @@
+{
+  "reason": "macOS sandbox denies sysctl process inspection needed by joblib workers",
+  "first_attempt": "pesquisa_01",
+  "next_attempt": "pesquisa_02",
+  "model_and_protocol_unchanged": true,
+  "fm_outer_folds_completed": 0
+}

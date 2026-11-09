@@ -1,0 +1,136 @@
+{
+  "purpose": "Post-fit implementation audit only; no model or configuration change",
+  "binary_numeric_columns": [
+    {
+      "column": "FLAG_MOBIL",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "FLAG_EMP_PHONE",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "FLAG_WORK_PHONE",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "DAYS_EMPLOYED_ANOM",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "NAME_CONTRACT_TYPE_COUNT",
+      "values": [
+        21920.0,
+        210782.0
+      ],
+      "max_abs": 210782.0
+    },
+    {
+      "column": "CODE_GENDER_COUNT",
+      "values": [
+        80233.0,
+        152465.0
+      ],
+      "max_abs": 152465.0
+    },
+    {
+      "column": "N_ADULTS",
+      "values": [
+        1.0,
+        2.0
+      ],
+      "max_abs": 2.0
+    },
+    {
+      "column": "EXT_SOURCE_1_MISSING",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "EXT_SOURCE_2_MISSING",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "EXT_SOURCE_3_MISSING",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "OWN_CAR_AGE_MISSING",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "AMT_REQ_CREDIT_BUREAU_YEAR_MISSING",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "PA_MATE_SUM",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    },
+    {
+      "column": "PB_MATE_SUM",
+      "values": [
+        0.0,
+        1.0
+      ],
+      "max_abs": 1.0
+    }
+  ],
+  "large_two_level_columns": [
+    {
+      "column": "NAME_CONTRACT_TYPE_COUNT",
+      "values": [
+        21920.0,
+        210782.0
+      ],
+      "max_abs": 210782.0
+    },
+    {
+      "column": "CODE_GENDER_COUNT",
+      "values": [
+        80233.0,
+        152465.0
+      ],
+      "max_abs": 152465.0
+    }
+  ],
+  "auxiliary_regressors_refitted": false
+}

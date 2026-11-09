@@ -1,0 +1,16 @@
+{
+  "reason": "Notion workspace upload limit 5 MiB; full original ZIP preserved unchanged",
+  "original_zip_sha256": "17f4333e803f4d5def28834f1e8f868c8c50fbcdc3d16a79a074e1c953d9f982",
+  "attachments": [
+    {
+      "filename": "gci_home_credit_v24_codigo_e_relatorios.zip",
+      "bytes": 3007377,
+      "sha256": "23ddd70f036c679559445fae7bb9e609d46702e01952c493bc107f08651183c2"
+    },
+    {
+      "filename": "gci_home_credit_v24_evidencias_oof.zip",
+      "bytes": 3466605,
+      "sha256": "a7729e418a5628997dac147fa9aa8e71955bf7c2a57edffcc09da71bf32586bf"
+    }
+  ]
+}

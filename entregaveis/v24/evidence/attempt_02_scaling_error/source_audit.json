@@ -1,0 +1,11 @@
+{
+  "original_definitions_verified": 24,
+  "research_source_sha256": "e0d0e467e0c69fda6c58034dcea79f0afe09a8a887c71fd7403e6c2fdb45150a",
+  "protocol_sha256": "02f9588325cc88f8d2d57d83b1cb58108a96ac20c04dd0141e08c1646da3fe5e",
+  "fm_module_sha256": "71488f658ae17775174040ff7d8eafb6b33cd0e6c58557a65fed0b711b9f86b9",
+  "frozen_before_training": true,
+  "cv_workers": 2,
+  "threads_per_model": 2,
+  "full_reproduction_not_executed": true,
+  "no_new_dependencies": true
+}

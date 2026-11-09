@@ -1,0 +1,117 @@
+{
+  "version": "v24",
+  "hypothesis": "PyTorch second-order factorization machine",
+  "deadline": "2026-11-14",
+  "seed": 42,
+  "threads_per_model": 2,
+  "cv_workers": 2,
+  "folds": {
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "selection_folds": [
+    0,
+    1
+  ],
+  "confirmation_folds": [
+    2,
+    3,
+    4
+  ],
+  "alpha_grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2
+  ],
+  "tie_break": "smaller_alpha",
+  "baseline_weights": [
+    0.156571875,
+    0.005900625,
+    0.21094875,
+    0.17445374999999996,
+    0.194625,
+    0.15750000000000003,
+    0.1
+  ],
+  "baseline_final_sizes": [
+    1646,
+    1793,
+    11,
+    1103,
+    14,
+    11,
+    1089
+  ],
+  "fm": {
+    "feature_set": "plusx",
+    "rank": 16,
+    "linear": true,
+    "loss": "unweighted_BCE",
+    "optimizer": "AdamW",
+    "lr": 0.002,
+    "weight_decay": 0.001,
+    "batch_size": 2048,
+    "max_epochs": 40,
+    "patience": 6,
+    "min_delta": 1e-06,
+    "inner_fraction": 0.15,
+    "inner_random_state": 42,
+    "factor_init_std": 0.01,
+    "linear_init": "zero",
+    "bias_init": "logit_of_training_prevalence",
+    "model_seed": 42,
+    "quantiles": 256,
+    "quantile_distribution": "normal",
+    "clip": 4.0,
+    "categorical": "dense_one_hot_unknown_ignore",
+    "missing": "zero_numeric_plus_training_missing_indicators",
+    "constant_columns": "drop_by_training_only",
+    "epoch_selection": "inner_AUC_then_refit_all_outer_training_from_scratch",
+    "final_epochs": "rounded_mean_of_outer_inner_selected_epochs_no_multiplier"
+  },
+  "strata": {
+    "key": "round(AMT_CREDIT / AMT_ANNUITY, 2)",
+    "decimals": 2,
+    "count_source": "outer_training_only_excluding_evaluated_fold",
+    "bins": [
+      [
+        0,
+        9
+      ],
+      [
+        10,
+        49
+      ],
+      [
+        50,
+        199
+      ],
+      [
+        200,
+        null
+      ]
+    ],
+    "names": [
+      "raras_0_9",
+      "pouco_frequentes_10_49",
+      "comuns_50_199",
+      "muito_frequentes_200_mais"
+    ],
+    "invalid": "missing_nonfinite_or_nonpositive_credit_or_annuity",
+    "use": "diagnostics_only_never_feature_weight_or_prediction_rule"
+  },
+  "rank_procedure": "screen_on_0_1_ranks_then_if_pass_reselect_same_grid_with_global_ranks_using_only_labels_0_1",
+  "screening": "stop_if_best_alpha_zero_or_no_positive_gain_on_0_1",
+  "promotion": {
+    "min_delta_2_4": 0.0001,
+    "total_delta_strictly_positive": true,
+    "reference_2_4": 0.7747809092432562,
+    "reference_total": 0.7740567649584406
+  },
+  "final_limit_seconds": 3600,
+  "no_prediction_or_model_loading": true,
+  "note": "Inherited v21 unlabeled train+test preprocessing and v21 early stopping are preserved for exact comparison. New FM epoch selection uses an inner split."
+}

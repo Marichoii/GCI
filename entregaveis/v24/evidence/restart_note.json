@@ -1,0 +1,10 @@
+{
+  "valid_attempt": "pesquisa_03",
+  "prior_attempts": {
+    "pesquisa_01": "sandbox failure before outer fits",
+    "pesquisa_02": "invalid implementation; interrupted before weight selection"
+  },
+  "implementation_revision": 2,
+  "only_correction": "Normalize two-level counts; only zero-one indicators bypass quantiles",
+  "no_hyperparameter_change": true
+}

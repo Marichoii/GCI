@@ -1,0 +1,152 @@
+CELL 1 START (0.0s)
+CELL 1 END (0.5s)
+CELL 3 START (0.5s)
+CELL 3 END (1.2s)
+CELL 4 START (1.2s)
+CELL 4 END (1.2s)
+CELL 5 START (1.2s)
+CELL 5 END (1.2s)
+CELL 6 START (1.2s)
+CELL 6 END (1.2s)
+CELL 7 START (1.2s)
+CELL 7 END (1.2s)
+CELL 8 START (1.2s)
+CELL 8 END (1.2s)
+CELL 9 START (1.2s)
+CELL 9 END (1.2s)
+CELL 10 START (1.2s)
+CELL 10 END (1.2s)
+CELL 11 START (1.2s)
+CELL 11 END (1.2s)
+CELL 12 START (1.2s)
+CELL 12 END (1.2s)
+CELL 13 START (1.2s)
+CELL 13 END (1.2s)
+CELL 15 START (1.2s)
+LightGBM B + EXT auxiliares  peso 0.265  sementes [42, 2024, 7]  tamanho 1646
+LightGBM B (variáveis da v7) peso 0.051  sementes [42, 2024, 7]  tamanho 1793
+Rede neural (MLP, 8 sementes) peso 0.298  sementes [42, 2024, 7, 11, 99, 123, 5, 77]  tamanho 10
+CatBoost + EXT auxiliares    peso 0.386  sementes [42, 2024]  tamanho 1094
+CELL 15 END (1.2s)
+CELL 17 START (1.2s)
+CELL 17 END (1.3s)
+CELL 19 START (1.3s)
+CELL 19 END (1.3s)
+CELL 21 START (1.3s)
+CELL 21 END (1.3s)
+CELL 22 START (1.3s)
+CELL 22 END (1.3s)
+CELL 23 START (1.3s)
+CELL 23 END (1.3s)
+CELL 24 START (1.3s)
+CELL 24 END (1.3s)
+CELL 25 START (1.3s)
+CELL 25 END (1.3s)
+CELL 26 START (1.3s)
+CELL 26 END (1.3s)
+CELL 27 START (1.3s)
+Protocolo e estratos congelados antes de prepare/fit a12da7b39a7d6649831dc41f4972e96bfedd0d4b4a2b319b34928f1abd25a6fc
+muito_frequentes_200_mais    99603
+comuns_50_199                47841
+pouco_frequentes_10_49       19524
+raras_0_9                     4234
+{'base': 74, 'plusx': 142, 'catx': 134} 49s
+V24 parte 0 iniciada
+V24 parte 1 iniciada
+FM inner época 1: AUC 0.76757863
+FM inner época 2: AUC 0.77119297
+FM inner época 3: AUC 0.76930335
+FM inner época 1: AUC 0.76333949
+FM inner época 4: AUC 0.76962168
+FM inner época 2: AUC 0.76720071
+FM inner época 5: AUC 0.77076071
+FM inner época 3: AUC 0.76683508
+FM inner época 4: AUC 0.76767727
+FM inner época 5: AUC 0.76831014
+FM inner época 6: AUC 0.76816915
+FM inner época 6: AUC 0.77033444
+FM inner época 7: AUC 0.76773660
+FM inner época 8: AUC 0.76541218
+FM inner época 7: AUC 0.76802537
+FM inner época 8: AUC 0.76722503
+FM inner época 9: AUC 0.76486166
+FM inner época 10: AUC 0.76577958
+FM inner época 11: AUC 0.76667380
+FM parte 0: AUC 0.76233991, épocas 2
+PARTE 0 iniciada; candidatos [0]
+FM parte 1: AUC 0.76601042, épocas 5
+PARTE 1 iniciada; candidatos [0]
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 728
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 42 concluída, tamanho 1750
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1077
+BASELINE parte 0: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1247
+BASELINE parte 0: LightGBM B + EXT auxiliares, AUC 0.76792366, 68.6s
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 2024 concluída, tamanho 1607
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1298
+BASELINE parte 1: LightGBM B + EXT auxiliares seed 7 concluída, tamanho 1621
+BASELINE parte 1: LightGBM B + EXT auxiliares, AUC 0.77422517, 112.2s
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1334
+BASELINE parte 0: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1525
+BASELINE parte 0: LightGBM B (variáveis da v7), AUC 0.76646105, 77.2s
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 42 concluída, tamanho 1796
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 2024 concluída, tamanho 1671
+BASELINE parte 1: LightGBM B (variáveis da v7) seed 7 concluída, tamanho 1628
+BASELINE parte 1: LightGBM B (variáveis da v7), AUC 0.77140376, 100.2s
+PASS: alterar todos os TARGET da validação não altera nenhum dos 3 frames usados nos quantis da MLP.
+  MLP estrita parte 0, semente 42: época 9
+  MLP estrita parte 0, semente 2024: época 4
+  MLP estrita parte 0, semente 7: época 12
+  MLP estrita parte 0, semente 11: época 10
+  MLP estrita parte 0, semente 99: época 13
+  MLP estrita parte 0, semente 123: época 10
+  MLP estrita parte 0, semente 5: época 7
+  MLP estrita parte 0, semente 77: época 18
+MLP estrita parte 0: AUC 0.76720511
+BASELINE parte 0: Rede neural (MLP, 8 sementes), AUC 0.76720511, 230.7s
+  MLP estrita parte 1, semente 42: época 7
+  MLP estrita parte 1, semente 2024: época 12
+  MLP estrita parte 1, semente 7: época 5
+  MLP estrita parte 1, semente 11: época 5
+  MLP estrita parte 1, semente 99: época 12
+  MLP estrita parte 1, semente 123: época 9
+  MLP estrita parte 1, semente 5: época 12
+  MLP estrita parte 1, semente 77: época 11
+MLP estrita parte 1: AUC 0.77146101
+BASELINE parte 1: Rede neural (MLP, 8 sementes), AUC 0.77146101, 217.1s
+BASELINE parte 0: CatBoost + EXT auxiliares seed 42 concluída, tamanho 609
+BASELINE parte 1: CatBoost + EXT auxiliares seed 42 concluída, tamanho 946
+BASELINE parte 0: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 1180
+BASELINE parte 0: CatBoost + EXT auxiliares, AUC 0.76897199, 413.4s
+BASELINE parte 1: CatBoost + EXT auxiliares seed 2024 concluída, tamanho 911
+BASELINE parte 1: CatBoost + EXT auxiliares, AUC 0.77220419, 430.1s
+BASELINE TabM parte 0: AUC 0.76809630, época 9
+NOVO parte 0: tabm_pair_full, AUC 0.76800812, tamanho 5, 170.5s
+BASELINE TabM parte 1: AUC 0.77347002, época 15
+NOVO parte 0: cat_ordered_depth5 iniciado
+NOVO parte 1: tabm_pair_full, AUC 0.77274881, tamanho 15, 199.5s
+NOVO parte 1: cat_ordered_depth5 iniciado
+0:	test: 0.6842158	best: 0.6842158 (0)	total: 346ms	remaining: 23m 3s
+500:	test: 0.7675035	best: 0.7675069 (499)	total: 3m 16s	remaining: 22m 51s
+1000:	test: 0.7678588	best: 0.7683584 (883)	total: 6m 27s	remaining: 19m 20s
+Stopped by overfitting detector  (200 iterations wait)
+
+bestTest = 0.7683583842
+bestIteration = 883
+
+Shrink model to first 884 iterations.
+NOVO parte 0: cat_ordered_depth5, AUC 0.76835838, tamanho 884, 416.9s
+PARTE 0 concluída; 1596.2s
+0:	test: 0.6959138	best: 0.6959138 (0)	total: 422ms	remaining: 28m 8s
+500:	test: 0.7708499	best: 0.7708571 (496)	total: 3m 8s	remaining: 21m 53s
+1000:	test: 0.7716002	best: 0.7716439 (996)	total: 5m 11s	remaining: 15m 33s
+Stopped by overfitting detector  (200 iterations wait)
+
+bestTest = 0.7718100441
+bestIteration = 1229
+
+Shrink model to first 1230 iterations.
+NOVO parte 1: cat_ordered_depth5, AUC 0.77181004, tamanho 1230, 407.7s
+PARTE 1 concluída; 1787.6s
+V24 TRIAGEM {"choice": {"alpha": 0.0, "auc": 0.7730026262146088}, "grid": [{"alpha": 0.0, "auc": 0.7730026262146088}, {"alpha": 0.05, "auc": 0.7729762979605858}, {"alpha": 0.1, "auc": 0.7728989192105199}, {"alpha": 0.15, "auc": 0.7727847975489855}, {"alpha": 0.2, "auc": 0.7726221076711416}]}
+CELL 27 END (1851.0s)
+EXECUTION FINISHED pesquisa_03

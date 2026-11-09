@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "FM equals explicit pairwise interactions",
+    "FM analytical gradient",
+    "held-out covariates do not alter FM training transforms; unknown category accepted",
+    "stratum counts exclude each evaluated row and its outer fold",
+    "fixed alpha grid; tie chooses zero; v21 proportions preserved",
+    "no prediction/model loader in FM module; frozen protocol matches notebook"
+  ],
+  "passed": true,
+  "real_competition_model_training_executed": false,
+  "source_sha256": "e0d0e467e0c69fda6c58034dcea79f0afe09a8a887c71fd7403e6c2fdb45150a"
+}
