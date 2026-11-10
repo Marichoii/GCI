@@ -1,0 +1,12 @@
+{
+  "checked_on": "2026-11-10",
+  "sources": {
+    "colab_python_announcement": "https://github.com/googlecolab/colabtools/issues/6081",
+    "runtime_versions": "https://research.google.com/colaboratory/runtime-version-faq.html",
+    "torch_cpu": "https://download.pytorch.org/whl/cpu/torch/",
+    "pip_subprocess": "https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program",
+    "ipython_cell_events": "https://ipython.readthedocs.io/en/stable/config/callbacks.html",
+    "colab_io": "https://colab.research.google.com/notebooks/io.ipynb",
+    "colab_limits": "https://research.google.com/colaboratory/faq.html"
+  }
+}

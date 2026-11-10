@@ -1,0 +1,27 @@
+test_actual_installed_environment_no_install (__main__.ColabCells.test_actual_installed_environment_no_install) ... ok
+test_bad_input_stops (__main__.ColabCells.test_bad_input_stops) ... ok
+test_csv_invalid_cases_rejected_without_writing_predictions (__main__.ColabCells.test_csv_invalid_cases_rejected_without_writing_predictions) ... ok
+test_existing_csv_not_overwritten (__main__.ColabCells.test_existing_csv_not_overwritten) ... ok
+test_failed_install_stops_partial_environment (__main__.ColabCells.test_failed_install_stops_partial_environment) ... ok
+test_historical_csv_passes_read_only (__main__.ColabCells.test_historical_csv_passes_read_only) ... ok
+test_install_then_restart_and_rerun_still_stops (__main__.ColabCells.test_install_then_restart_and_rerun_still_stops) ... ok
+test_linux_requests_cpu_build (__main__.ColabCells.test_linux_requests_cpu_build) ... ok
+test_loaded_numpy_mismatch_stops (__main__.ColabCells.test_loaded_numpy_mismatch_stops) ... ok
+test_loaded_torch_build_mismatch_stops (__main__.ColabCells.test_loaded_torch_build_mismatch_stops) ... ok
+test_missing_existing_input_stops (__main__.ColabCells.test_missing_existing_input_stops) ... ok
+test_mock_drive_mount_and_copy (__main__.ColabCells.test_mock_drive_mount_and_copy) ... ok
+test_mock_upload_bad_hash_not_copied (__main__.ColabCells.test_mock_upload_bad_hash_not_copied) ... ok
+test_mock_upload_only_correct_files_copied (__main__.ColabCells.test_mock_upload_only_correct_files_copied) ... ok
+test_model_cells_and_frozen_identical (__main__.ColabCells.test_model_cells_and_frozen_identical) ... ok
+test_notebook_schema_without_new_missing_cell_ids (__main__.ColabCells.test_notebook_schema_without_new_missing_cell_ids) ... ok
+test_real_inputs_match_readme_without_copy (__main__.ColabCells.test_real_inputs_match_readme_without_copy) ... ok
+test_research_environment_blocked (__main__.ColabCells.test_research_environment_blocked) ... ok
+test_time_warning_threshold_without_waiting (__main__.ColabCells.test_time_warning_threshold_without_waiting) ... ok
+test_timing_hooks_without_executing_model_cell (__main__.ColabCells.test_timing_hooks_without_executing_model_cell) ... ok
+test_uncovered_python_stops_without_install (__main__.ColabCells.test_uncovered_python_stops_without_install) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 3.675s
+
+OK
+

@@ -1,0 +1,387 @@
+--- gci_home_credit_v21.ipynb (células legíveis)
++++ gci_home_credit_v21_colab.ipynb (células legíveis)
+@@ -1,14 +1,35 @@
+ 
+ # ===== MARKDOWN =====
+-# Home Credit — v21: treino integral reproduzível
+-
+-Usa somente input/train.csv e input/test.csv; treina todos os componentes do zero. Não carrega previsões, OOFs, checkpoints ou modelos salvos. Duas threads por modelo e sementes fixas. 24 definições da v17 preservadas; pré-processamento supervisionado fora da parte. Família e peso escolhidos somente em 0–1; confirmação positiva em 2–4 e total. Nenhum ajuste posterior. Tamanhos = média do early stopping × 1,15, arredondada. As AUCs são registros da validação. Por padrão treina em 100% dos dados e grava output/submission.csv. GCI_RUN_CV=1 refaz a pesquisa.
+-
+-
+-# ===== CODE =====
++# Home Credit v21 — execução no Google Colab CPU
++
++Mesma receita congelada da v21. Nenhum modelo, feature, seed, peso, tamanho ou
++FROZEN_V21 foi alterado. Pesquisa encerrada; executar apenas o treino integral.
++
++Primeiro execute somente a célula de ambiente. Se instalar pacotes, ela para:
++**reinicie o ambiente e rode tudo de novo**. Depois do reinício, use Executar tudo.
++Selecione upload ou Drive na célula de entrada; arquivos existentes corretos
++são reutilizados. Não são carregadas previsões, OOFs, checkpoints ou modelos.
++
++As células originais de modelagem e a célula original de treino integral foram
++preservadas integralmente. As adições são ambiente, entrada, cronometragem,
++verificação e exportação. Consulte COMO_RODAR_NO_COLAB.md e o diff anexo.
++
++
++# ===== CODE =====
++# Ambiente Colab — não altera modelos, seeds, pesos ou FROZEN_V21.
+ import os, sys, subprocess, importlib.metadata, random, platform
+ from pathlib import Path
+-notebook_wall_started = __import__("time").time()
++import time as _colab_time
++import json as _colab_json
++import sysconfig as _colab_sysconfig
++
++notebook_wall_started = _colab_time.time()
++_COLAB_RUN_STARTED = _colab_time.perf_counter()
++_COLAB_ENV_STARTED = _COLAB_RUN_STARTED
++_V21_ENV_READY = False
++if globals().get("_V21_RESTART_REQUIRED", False):
++    raise RuntimeError("reinicie o ambiente e rode tudo de novo — a instalação ocorreu neste mesmo processo.")
++
+ for key in ["OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+             "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"]:
+     os.environ[key] = "2"
+@@ -17,33 +38,155 @@
+           "scikit-learn": "1.8.0", "lightgbm": "4.6.0", "catboost": "1.2.8",
+           "torch": "2.6.0", "tabm": "0.0.3", "rtdl-num-embeddings": "0.0.12",
+           "threadpoolctl": "3.6.0", "joblib": "1.6.0"}
+-needed = []
+-for name, version in PINNED.items():
++IN_COLAB = "google.colab" in sys.modules or bool(os.environ.get("COLAB_RELEASE_TAG"))
++BASE_DIR = Path(os.environ.get("GCI_WORKDIR", "/content/gci_home_credit_v21" if IN_COLAB else Path.cwd())).resolve()
++BASE_DIR.mkdir(parents=True, exist_ok=True)
++_COLAB_LOG_DIR = BASE_DIR / "output"
++_COLAB_LOG_DIR.mkdir(exist_ok=True)
++print("Python:", sys.version)
++print("Plataforma:", platform.platform())
++print("Pasta de trabalho:", BASE_DIR)
++if (platform.python_implementation() != "CPython" or sys.version_info[:2] not in {(3,11), (3,12), (3,13)}
++        or _colab_sysconfig.get_config_var("Py_GIL_DISABLED")):
++    raise RuntimeError("Python não coberto pelos wheels auditados. No Colab, selecione o runtime 2026.07 (Python 3.12), reconecte e rode a primeira célula. Não altere os pins.")
++if IN_COLAB and (sys.platform != "linux" or platform.machine().lower() not in {"x86_64", "amd64"}):
++    raise RuntimeError("Esta preparação foi auditada para Colab Linux x86-64, CPU. Selecione esse tipo de ambiente.")
++
++_installed = {}
++for _name in PINNED:
+     try:
+-        ok = importlib.metadata.version(name).split("+")[0] == version
++        _installed[_name] = importlib.metadata.version(_name)
+     except importlib.metadata.PackageNotFoundError:
+-        ok = False
+-    if not ok:
+-        needed.append(f"{name}=={version}")
+-if needed:
+-    # O índice CPU é usado para PyTorch em Linux/Colab; macOS usa PyPI.
+-    torch_needed = [p for p in needed if p.startswith("torch==")]
+-    other_needed = [p for p in needed if not p.startswith("torch==")]
+-    if torch_needed:
+-        command = [sys.executable, "-m", "pip", "install", "--quiet", *torch_needed]
+-        if sys.platform == "linux":
+-            command += ["--index-url", "https://download.pytorch.org/whl/cpu"]
+-        subprocess.run(command, check=True)
+-    if other_needed:
+-        subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", *other_needed], check=True)
+-assert {p: importlib.metadata.version(p).split("+")[0] for p in PINNED} == PINNED
+-# PyTorch fornece libomp no macOS; importar primeiro também resolve LightGBM
+-# em instalações sem o pacote libomp do Homebrew. Sem alterar as funções v17.
+-os.environ.setdefault("MPLCONFIGDIR", str(Path.cwd() / ".mpl-cache"))
+-import torch
+-BASE_DIR = Path(os.environ.get("GCI_WORKDIR", Path.cwd())).resolve()
+-assert (BASE_DIR / "input/train.csv").is_file(), f"Falta input/train.csv em {BASE_DIR}"
+-assert (BASE_DIR / "input/test.csv").is_file(), f"Falta input/test.csv em {BASE_DIR}"
++        _installed[_name] = None
++_wanted = dict(PINNED)
++if sys.platform == "linux":
++    _wanted["torch"] = "2.6.0+cpu"
++_needed = [_name for _name,_version in _wanted.items()
++           if _installed[_name] is None or (_installed[_name] != _version if _name == "torch" and sys.platform == "linux"
++                                           else _installed[_name].split("+")[0] != _version)]
++if _needed:
++    # Uma transação, só wheels; nenhum import numérico antes do reinício.
++    _V21_RESTART_REQUIRED = True
++    _command = [sys.executable, "-m", "pip", "install", "--only-binary=:all:", "--upgrade-strategy", "only-if-needed",
++                "--index-url", "https://pypi.org/simple"]
++    if sys.platform == "linux":
++        _command += ["--extra-index-url", "https://download.pytorch.org/whl/cpu"]
++    _command += [f"{_name}=={_version}" for _name,_version in _wanted.items()]
++    _install_record = dict(python=sys.version, platform=platform.platform(), previous_versions=_installed,
++                           requested_versions=_wanted, status="restart_required", seconds=None)
++    try:
++        subprocess.run(_command, check=True)
++    except subprocess.CalledProcessError as _error:
++        _install_record["status"] = "installation_failed_restart_required"
++        _install_record["seconds"] = _colab_time.perf_counter()-_COLAB_ENV_STARTED
++        (_COLAB_LOG_DIR/"instalacao_colab.json").write_text(_colab_json.dumps(_install_record,indent=2)+"\n")
++        raise RuntimeError("A instalação falhou; não continue com versões parciais. reinicie o ambiente e rode tudo de novo. Se não houver wheel, selecione o runtime 2026.07/Python 3.12, sem mudar os pins.") from _error
++    _install_record["seconds"] = _colab_time.perf_counter()-_COLAB_ENV_STARTED
++    (_COLAB_LOG_DIR/"instalacao_colab.json").write_text(_colab_json.dumps(_install_record,indent=2)+"\n")
++    raise RuntimeError("Instalação concluída. reinicie o ambiente e rode tudo de novo. Use Ambiente de execução > Reiniciar sessão (Restart session), depois Executar tudo. Reexecutar só esta célula NÃO substitui o reinício.")
++
++# Detectar módulos que ficaram em memória depois de uma instalação externa.
++_module_packages = {"numpy":"numpy", "pandas":"pandas", "scipy":"scipy", "torch":"torch",
++                    "sklearn":"scikit-learn", "lightgbm":"lightgbm", "catboost":"catboost"}
++for _module,_package in _module_packages.items():
++    _loaded = sys.modules.get(_module)
++    _loaded_version = getattr(_loaded,"__version__",None) if _loaded is not None else None
++    if _loaded_version is not None and (str(_loaded_version).split("+")[0] != PINNED[_package]
++            or (_module == "torch" and sys.platform == "linux" and str(_loaded_version) != _wanted["torch"])):
++        _V21_RESTART_REQUIRED = True
++        raise RuntimeError(f"{_module} em memória difere do pin instalado: reinicie o ambiente e rode tudo de novo.")
++assert {p:importlib.metadata.version(p).split("+")[0] for p in PINNED} == PINNED
++os.environ.setdefault("MPLCONFIGDIR", str(Path.cwd()/".mpl-cache"))
++import torch  # Primeiro import numérico, como na v21 validada.
++_V21_ENV_READY = True
++_COLAB_STAGE_TIMES = [{"etapa":"Ambiente/import inicial", "segundos":_colab_time.perf_counter()-_COLAB_ENV_STARTED}]
++(_COLAB_LOG_DIR/"ambiente_colab.json").write_text(_colab_json.dumps(dict(
++    python=sys.version, platform=platform.platform(), versions=_installed,
++    requested_versions=_wanted, status="ready", restart_required=False),indent=2)+"\n")
++print("Ambiente conferido. Versões base idênticas aos pins v21; prossiga para os dados.")
++
++
++# ===== MARKDOWN =====
++## Entrada opcional: upload ou Google Drive
++
++Só os dois CSVs oficiais do GCI; SHA-256 conferido antes de qualquer treino. Se input/ já estiver correto, esta célula apenas o valida.
++
++# ===== CODE =====
++# Opcional: se input/ já está correto, a célula apenas confere os hashes.
++INPUT_MODE = "upload" # @param ["upload", "drive", "existente"]
++DRIVE_INPUT_DIR = "/content/drive/MyDrive/GCI/input" # @param {type:"string"}
++
++assert globals().get("_V21_ENV_READY",False), "Execute a primeira célula e reinicie se solicitado."
++import hashlib as _colab_hashlib
++import shutil as _colab_shutil
++import tempfile as _colab_tempfile
++_COLAB_INPUT_STARTED = _colab_time.perf_counter()
++EXPECTED_INPUT_SHA256 = {
++    "train.csv":"b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
++    "test.csv":"dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"}
++
++def _colab_sha256_file(path):
++    digest = _colab_hashlib.sha256()
++    with Path(path).open("rb") as stream:
++        for block in iter(lambda:stream.read(1024*1024),b""):
++            digest.update(block)
++    return digest.hexdigest()
++
++def _colab_check_inputs(directory):
++    actual = {}
++    for name,expected in EXPECTED_INPUT_SHA256.items():
++        path = Path(directory)/name
++        if not path.is_file():
++            raise FileNotFoundError(f"Falta {path}. Use upload ou Drive com os dois CSVs oficiais do GCI.")
++        actual[name] = _colab_sha256_file(path)
++        if actual[name] != expected:
++            raise ValueError(f"SHA-256 incorreto em {path}: {actual[name]}; esperado {expected}. Pare e corrija o arquivo; não use dados do Kaggle.")
++    return actual
++
++_input_dir = BASE_DIR/"input"
++_input_dir.mkdir(exist_ok=True)
++_all_present = all((_input_dir/name).is_file() for name in EXPECTED_INPUT_SHA256)
++if _all_present:
++    _input_hashes_checked = _colab_check_inputs(_input_dir)
++    print("input/ já existe e foi validado; nenhum upload/cópia necessário.")
++else:
++    if INPUT_MODE == "upload":
++        if not IN_COLAB:
++            raise RuntimeError("Upload só está disponível no Colab. Localmente use INPUT_MODE='existente' e prepare input/.")
++        from google.colab import files
++        # O upload grava arquivos; isolá-los antes de validar e copiar.
++        _old_cwd = Path.cwd()
++        with _colab_tempfile.TemporaryDirectory(prefix="gci_v21_upload_",dir=BASE_DIR) as _staging:
++            try:
++                os.chdir(_staging)
++                print("Selecione juntos train.csv e test.csv, com esses nomes exatos.")
++                _uploaded = files.upload()
++            finally:
++                os.chdir(_old_cwd)
++            if set(_uploaded) != set(EXPECTED_INPUT_SHA256):
++                raise ValueError("Selecione somente train.csv e test.csv, juntos, sem renomear os arquivos.")
++            for _name,_data in _uploaded.items():
++                (Path(_staging)/_name).write_bytes(_data)
++            _colab_check_inputs(_staging)
++            for _name in EXPECTED_INPUT_SHA256:
++                _colab_shutil.copyfile(Path(_staging)/_name,_input_dir/_name)
++        del _uploaded
++    elif INPUT_MODE == "drive":
++        if not IN_COLAB:
++            raise RuntimeError("Montagem de Drive só está disponível no Colab.")
++        from google.colab import drive
++        drive.mount("/content/drive")
++        _source = Path(DRIVE_INPUT_DIR)
++        _colab_check_inputs(_source)
++        for _name in EXPECTED_INPUT_SHA256:
++            if (_source/_name).resolve() != (_input_dir/_name).resolve():
++                _colab_shutil.copyfile(_source/_name,_input_dir/_name)
++    elif INPUT_MODE != "existente":
++        raise ValueError("INPUT_MODE deve ser upload, drive ou existente.")
++    _input_hashes_checked = _colab_check_inputs(_input_dir)
++_COLAB_STAGE_TIMES.append({"etapa":"Entrada: upload/cópia e hashes", "segundos":_colab_time.perf_counter()-_COLAB_INPUT_STARTED})
++for _name,_digest in _input_hashes_checked.items():
++    print(_name,"SHA-256",_digest)
+ 
+ 
+ # ===== MARKDOWN =====
+@@ -1250,6 +1393,51 @@
+     save()
+     print(pd.DataFrame(table).to_string(index=False,float_format=lambda v:f"{v:.8f}"),flush=True)
+     return report
++
++
++# ===== MARKDOWN =====
++## Ambiente/entrada: conferir antes do treino
++
++O bloco seguinte mede o início da etapa e impede pesquisa ou sobrescrita acidental. A célula de treino logo depois dele é idêntica à original.
++
++# ===== CODE =====
++# Guardas de ambiente/entrada. A célula seguinte é a original v21, inteira.
++assert globals().get("_V21_ENV_READY",False), "Ambiente ainda não validado. Reinicie se solicitado e execute tudo."
++if os.environ.get("GCI_RUN_CV","0") != "0" or os.environ.get("GCI_CV_ONLY","0") != "0":
++    raise RuntimeError("A pesquisa está encerrada. Use GCI_RUN_CV=0 e GCI_CV_ONLY=0; somente FROZEN_V21 será reproduzido.")
++_colab_check_inputs(BASE_DIR/"input")
++if (BASE_DIR/"output/submission.csv").exists():
++    raise FileExistsError("Já existe output/submission.csv. Para conferir/baixar, execute apenas as células finais se o treino já terminou nesta sessão. Para repetir do zero, use uma pasta GCI_WORKDIR nova; não sobrescreva uma execução anterior.")
++_COLAB_MAIN_STARTED = _colab_time.perf_counter()
++_COLAB_MAIN_FINISHED_AT = None
++_COLAB_TIMING_MODE = "fallback: medição entre células, inclui possíveis esperas"
++_COLAB_ORIGINAL_MAIN_SHA256 = "123aff7f629c0f167eb1ddce32b36fd46e10110e783e9fd4bf99b0362794a0bd"
++
++def _colab_main_pre(info):
++    global _COLAB_MAIN_STARTED
++    if _colab_hashlib.sha256(info.raw_cell.strip().encode()).hexdigest() == _COLAB_ORIGINAL_MAIN_SHA256:
++        _COLAB_MAIN_STARTED = _colab_time.perf_counter()
++
++def _colab_main_post(result):
++    global _COLAB_MAIN_FINISHED_AT
++    if _colab_hashlib.sha256(result.info.raw_cell.strip().encode()).hexdigest() == _COLAB_ORIGINAL_MAIN_SHA256:
++        _COLAB_MAIN_FINISHED_AT = _colab_time.perf_counter()
++        if _COLAB_MAIN_FINISHED_AT-_COLAB_RUN_STARTED > 90*60:
++            print("AVISO: o tempo total desta execução passou de 90 minutos; modelos e receita permaneceram iguais.")
++
++try:
++    _colab_ipy = get_ipython()
++except NameError:
++    _colab_ipy = None
++if _colab_ipy is not None:
++    # Eventos de célula, sem decorar, reescrever ou instrumentar modelos.
++    for _event,_callback in globals().get("_COLAB_TIMING_HOOKS",[]):
++        _colab_ipy.events.unregister(_event,_callback)
++    _COLAB_TIMING_HOOKS = [("pre_run_cell",_colab_main_pre),("post_run_cell",_colab_main_post)]
++    for _event,_callback in _COLAB_TIMING_HOOKS:
++        _colab_ipy.events.register(_event,_callback)
++    _COLAB_TIMING_MODE = "IPython pre/post_run_cell: duração da célula original"
++print("Iniciando a célula original de treino integral. Modelos e FROZEN_V21 não foram alterados.")
+ 
+ 
+ # ===== CODE =====
+@@ -1347,6 +1535,108 @@
+ 
+ 
+ # ===== MARKDOWN =====
++## Verificação final e tempos
++
++Reabre o CSV gravado, confere formato, IDs, NaN, limites e SHA-256. O aviso de 90 minutos é emitido ao concluir a célula original de treino; não muda nem cancela modelos.
++
++# ===== CODE =====
++# Verificar o arquivo gravado, sem alterar seus bytes ou suas previsões.
++def _colab_validate_submission(path, expected_ids):
++    checked = pd.read_csv(path,float_precision="round_trip")
++    if checked.shape != (61500,2):
++        raise ValueError(f"CSV inválido: formato {checked.shape}; esperado (61500,2).")
++    if checked.columns.tolist() != ["SK_ID_CURR","TARGET"]:
++        raise ValueError("CSV inválido: colunas devem ser SK_ID_CURR,TARGET, nessa ordem.")
++    if checked.isna().any().any():
++        raise ValueError("CSV inválido: há NaN em IDs ou previsões.")
++    if not np.array_equal(checked.SK_ID_CURR.to_numpy(),np.asarray(expected_ids)):
++        raise ValueError("CSV inválido: IDs não estão na ordem de input/test.csv.")
++    values = checked.TARGET.to_numpy()
++    if not np.issubdtype(values.dtype,np.number) or not np.isfinite(values).all():
++        raise ValueError("CSV inválido: TARGET deve ser numérico e finito.")
++    if not ((values>=0)&(values<=1)).all():
++        raise ValueError("CSV inválido: TARGET fora do intervalo [0,1].")
++    return dict(linhas=len(checked),colunas=checked.columns.tolist(),ids_na_ordem=True,
++                sem_nan=True,valores_entre_zero_e_um=True,sha256=_colab_sha256_file(path))
++
++def _colab_time_warning(total_seconds):
++    exceeded = total_seconds > 90*60
++    if exceeded:
++        print("AVISO: o tempo total desta execução passou de 90 minutos. O aviso não muda nem interrompe o treinamento.")
++    return exceeded
++
++_COLAB_MAIN_SECONDS = (_COLAB_MAIN_FINISHED_AT or _colab_time.perf_counter())-_COLAB_MAIN_STARTED
++_COLAB_VERIFY_STARTED = _colab_time.perf_counter()
++assert RUN_CV is False and CV_ONLY is False and recipe == FROZEN_V21, "A receita congelada não foi preservada."
++if csv_sha256 is None or full_train_seconds is None:
++    raise RuntimeError("O treino integral não produziu CSV nesta sessão; não valide saídas antigas como resultado novo.")
++_colab_check_inputs(BASE_DIR/"input")
++_fresh_test_ids = pd.read_csv(BASE_DIR/"input/test.csv",usecols=["SK_ID_CURR"]).SK_ID_CURR.to_numpy()
++_validation = _colab_validate_submission(output_file,_fresh_test_ids)
++assert _validation["sha256"] == csv_sha256, "O CSV foi alterado depois de gravado."
++_historical_sha = "48334efc455a9a28f395e945fb4c04ee847458f439d8b26984e3965766d6a756"
++_validation["sha256_historico_macos"] = _historical_sha
++_validation["identico_ao_historico_macos"] = _validation["sha256"] == _historical_sha
++print("CSV conferido:",output_file)
++print("SHA-256:",_validation["sha256"])
++if not _validation["identico_ao_historico_macos"]:
++    print("ATENÇÃO: este SHA-256 difere do histórico macOS. As verificações de formato passaram, mas isso não comprova identidade entre Colab/Linux e macOS. Preserve e registre ambos os arquivos; não ajuste previsões para forçar o hash.")
++_COLAB_STAGE_TIMES.append({"etapa":"Leitura final, preparo/auxiliares e montagem", "segundos":max(0.0,_COLAB_MAIN_SECONDS-full_train_seconds)})
++_COLAB_STAGE_TIMES += [{"etapa":entry["component"],"segundos":entry["seconds"]} for entry in full_timings]
++_COLAB_STAGE_TIMES.append({"etapa":"Agregação, gravação e sobrecarga entre componentes", "segundos":max(0.0,full_train_seconds-sum(entry["seconds"] for entry in full_timings))})
++_COLAB_STAGE_TIMES.append({"etapa":"Verificação do CSV e hashes de entrada", "segundos":_colab_time.perf_counter()-_COLAB_VERIFY_STARTED})
++_colab_total_seconds = _colab_time.perf_counter()-_COLAB_RUN_STARTED
++_colab_exceeded_90 = _colab_time_warning(_colab_total_seconds)
++print(pd.DataFrame(_COLAB_STAGE_TIMES).assign(minutos=lambda frame:frame.segundos/60).to_string(index=False))
++print(f"Total desde a primeira célula após reinício: {_colab_total_seconds/60:.2f} minutos (inclui entrada e esperas entre células).")
++_colab_final_report = dict(validacao=_validation,etapas=_COLAB_STAGE_TIMES,total_seconds=_colab_total_seconds,
++                           exceeded_90_minutes=_colab_exceeded_90,python=sys.version,platform=platform.platform(),
++                           timing_mode=_COLAB_TIMING_MODE,
++                           installed_versions={p:importlib.metadata.version(p) for p in PINNED},
++                           threads_per_model=2,recipe_unchanged=True,training_report="execution_report.json")
++(output_dir/"verificacao_colab.json").write_text(_colab_json.dumps(_colab_final_report,ensure_ascii=False,indent=2)+"\n")
++(output_dir/"SHA256.txt").write_text(_validation["sha256"]+"  submission.csv\n")
++
++
++# ===== MARKDOWN =====
++## Guardar resultados — opcional
++
++Baixa um ZIP com CSV, hashes e relatórios; a cópia para Drive é opcional e usa uma pasta nova. Nenhum modelo ou checkpoint é salvo.
++
++# ===== CODE =====
++# Opcional: só resultados verificados desta sessão, nunca modelos/checkpoints.
++BAIXAR_RESULTADOS = True # @param {type:"boolean"}
++COPIAR_PARA_DRIVE = False # @param {type:"boolean"}
++DRIVE_OUTPUT_DIR = "/content/drive/MyDrive/GCI/resultados_v21" # @param {type:"string"}
++
++import zipfile as _colab_zipfile
++import datetime as _colab_datetime
++assert globals().get("_validation",{}).get("sha256") == _colab_sha256_file(output_file), "Execute a verificação final antes de guardar os resultados."
++_results_zip = output_dir/"resultados_v21_colab.zip"
++with _colab_zipfile.ZipFile(_results_zip,"w",compression=_colab_zipfile.ZIP_DEFLATED) as _bundle:
++    for _name in ["submission.csv","execution_report.json","verificacao_colab.json","ambiente_colab.json","instalacao_colab.json","SHA256.txt"]:
++        if (output_dir/_name).is_file():
++            _bundle.write(output_dir/_name,_name)
++if COPIAR_PARA_DRIVE:
++    if not IN_COLAB:
++        raise RuntimeError("Cópia automática para Drive só está disponível no Colab.")
++    from google.colab import drive
++    drive.mount("/content/drive")
++    _run_stamp = _colab_datetime.datetime.now(_colab_datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
++    _drive_destination = Path(DRIVE_OUTPUT_DIR)/_run_stamp
++    _drive_destination.mkdir(parents=True,exist_ok=False)
++    _colab_shutil.copyfile(_results_zip,_drive_destination/_results_zip.name)
++    print("Resultados copiados para",_drive_destination)
++if BAIXAR_RESULTADOS and IN_COLAB:
++    from google.colab import files
++    try:
++        files.download(str(_results_zip))
++    except Exception as _download_error:
++        print("Download automático não concluído:",_download_error,". Baixe o ZIP pelo painel Arquivos; o CSV e a verificação continuam salvos no runtime.")
++print("Pacote de resultados:",_results_zip)
++
++
++# ===== MARKDOWN =====
+ ## Créditos preservados da v17
+ 
+ ## Referências e créditos

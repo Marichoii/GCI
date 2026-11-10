@@ -1,0 +1,184 @@
+{
+  "original_notebook_sha256": "3c3866074fe4ee9e6f83c036a390dd149e781e85b30eeb188e7580018103d367",
+  "colab_notebook_sha256": "382311bf0420a2bc1daf900eeb2c2c8b18d39668ce691a18ae5710856d250297",
+  "frozen_v21_unchanged": true,
+  "original_full_training_cell_unchanged": true,
+  "unchanged_original_cells": [
+    {
+      "original_cell": 2,
+      "colab_cell": 4,
+      "unchanged": true,
+      "source_sha256": "c3d12c78d2c217e5355ce643ca3f792f5125e53e08f30b9ed3f1ab401affb961"
+    },
+    {
+      "original_cell": 3,
+      "colab_cell": 5,
+      "unchanged": true,
+      "source_sha256": "19042ff9dad846fb11d9717cf9fa59ea12339fe0e43deaaa9f83e3fda150868c"
+    },
+    {
+      "original_cell": 4,
+      "colab_cell": 6,
+      "unchanged": true,
+      "source_sha256": "e812ab75107ae64848cca61872fec8dc94a4805ef2adf165f6f54f3c4cbf8762"
+    },
+    {
+      "original_cell": 5,
+      "colab_cell": 7,
+      "unchanged": true,
+      "source_sha256": "159c26357c2e23d9f107c47db46337df41bcb1c389b03445f89a540301aae2c0"
+    },
+    {
+      "original_cell": 6,
+      "colab_cell": 8,
+      "unchanged": true,
+      "source_sha256": "8f504e41696763de11b8c3b4e8d0a1935a68579823f7120790faa4b801dc51d3"
+    },
+    {
+      "original_cell": 7,
+      "colab_cell": 9,
+      "unchanged": true,
+      "source_sha256": "b2944dcd35984069a7c1ee4b8523ede602c9a7a0564263fad5e27462868bc798"
+    },
+    {
+      "original_cell": 8,
+      "colab_cell": 10,
+      "unchanged": true,
+      "source_sha256": "90a670a35728e3f0e124de3445ea55c041b9f876574ae282b33063029dc34650"
+    },
+    {
+      "original_cell": 9,
+      "colab_cell": 11,
+      "unchanged": true,
+      "source_sha256": "83c284d0a564a320e17d52444659768b4a87c68919da4a005f2e0677a2d8fe40"
+    },
+    {
+      "original_cell": 10,
+      "colab_cell": 12,
+      "unchanged": true,
+      "source_sha256": "888141b47443266cc1619da5ec51892fc7ccfd3e41d53aa03074901051e751ca"
+    },
+    {
+      "original_cell": 11,
+      "colab_cell": 13,
+      "unchanged": true,
+      "source_sha256": "2198fd67c6f3d7e2456605d8c52f6377fb4fddb0b827fce6d7bb825315b72f8e"
+    },
+    {
+      "original_cell": 12,
+      "colab_cell": 14,
+      "unchanged": true,
+      "source_sha256": "b2e32ae0c1cf1a73b515507afa82eba54ae9379defc78451ca0223a4c29c073c"
+    },
+    {
+      "original_cell": 13,
+      "colab_cell": 15,
+      "unchanged": true,
+      "source_sha256": "8f28799aec85a17f8fec7e2caabecc3969c154c7912fbb46f610891fd39fb898"
+    },
+    {
+      "original_cell": 14,
+      "colab_cell": 16,
+      "unchanged": true,
+      "source_sha256": "9a9c64770f55b16ec44d4ee90e5c2f48d8179e379b39655045005f2034197c46"
+    },
+    {
+      "original_cell": 15,
+      "colab_cell": 17,
+      "unchanged": true,
+      "source_sha256": "6550c26ee779976e11a130284703510e4ff7838c043e1f3fa69f8189bbd6577a"
+    },
+    {
+      "original_cell": 16,
+      "colab_cell": 18,
+      "unchanged": true,
+      "source_sha256": "7af333e8ad0f65bd364acc26f4fc454af9112741073bc1ba56444efcd686ff5d"
+    },
+    {
+      "original_cell": 17,
+      "colab_cell": 19,
+      "unchanged": true,
+      "source_sha256": "0d1b35e40f1d25e687521dde6bfaae8126744fbdb6ce3eead67040f87060cb9e"
+    },
+    {
+      "original_cell": 18,
+      "colab_cell": 20,
+      "unchanged": true,
+      "source_sha256": "61a84c9419849bae38b5e6c6c4e2121502563933d5d7fb2b5c8d14587df87463"
+    },
+    {
+      "original_cell": 19,
+      "colab_cell": 21,
+      "unchanged": true,
+      "source_sha256": "e76088faac60a248c7a1a9124799c78d9b8d741fba1f690e812d3e8ffae89cde"
+    },
+    {
+      "original_cell": 20,
+      "colab_cell": 22,
+      "unchanged": true,
+      "source_sha256": "8c305e90c1b909e44eab00082d898cd1ffb8d326994dc1a2849313b3e6fee7bd"
+    },
+    {
+      "original_cell": 21,
+      "colab_cell": 23,
+      "unchanged": true,
+      "source_sha256": "045aac036fa46545056a350817bfd7406e8a9872ae42675bfbaedeb839d32fe9"
+    },
+    {
+      "original_cell": 22,
+      "colab_cell": 24,
+      "unchanged": true,
+      "source_sha256": "a236ef2ae84fb70c681916a85d5a8aa935b1553133329ca17bb7b0819c46a657"
+    },
+    {
+      "original_cell": 23,
+      "colab_cell": 25,
+      "unchanged": true,
+      "source_sha256": "e040fbe91918d9650c391a293fa1ad5418410bd6ea0074c2a4ba16c5d713b5e3"
+    },
+    {
+      "original_cell": 24,
+      "colab_cell": 26,
+      "unchanged": true,
+      "source_sha256": "3633f5a577849bc65b504e99feff77556dbede83e0020c7fd1a00204d64ecb23"
+    },
+    {
+      "original_cell": 25,
+      "colab_cell": 27,
+      "unchanged": true,
+      "source_sha256": "07a8d5aee4195bb426fa7b8aef0ebd2f6e8e355016dc3aed179a037f501108b4"
+    },
+    {
+      "original_cell": 26,
+      "colab_cell": 30,
+      "unchanged": true,
+      "source_sha256": "ce537646af2f61bdaeaded52d960cdb7f201a34e3d9833512309694b7af40fb8"
+    },
+    {
+      "original_cell": 27,
+      "colab_cell": 35,
+      "unchanged": true,
+      "source_sha256": "d2af97b6a02cfaa0e8eb15cc8fdaa0f725ec5117484d7d2b9aa3a264a0ef4c63"
+    }
+  ],
+  "changed_original_cells": [
+    0,
+    1
+  ],
+  "added_cell_roles": [
+    "documentacao",
+    "entrada",
+    "antes_do_treino",
+    "verificacao",
+    "guardar_resultados"
+  ],
+  "training_executed": false,
+  "colab_executed": false,
+  "environment_metadata_change": {
+    "language_info.version": {
+      "old": "3.12",
+      "new": "3.13"
+    }
+  },
+  "frozen_v21_sha256": "20610ca6bffd66b429dc5ab9a27ddcf320901a5fcf0a90c6b780a0b4b1e70608"
+}

@@ -1,0 +1,20 @@
+{
+  "COMO_RODAR_NO_COLAB.md": "75bbc87e527a8dbcb80ea1c9a7661db19fd890c69c6ce67957aa82b4e3919df6",
+  "README.md": "71fa2a964cfa295be761b1e88cddc182938e5738e8b4beded8bac97511d864f5",
+  "evidence/model_preservation.json": "7d5f1e477df3c97155bbca793a9e74a3437da3311695790a4ed25b8ed3c5ed96",
+  "evidence/resolved_linux_cp312.txt": "5e1070a503f50a5ce08045b4f3c5a7653f6d5f567f679bed8038d3657c8c8488",
+  "evidence/resolved_linux_cp313.txt": "1a61b0cc4a66b50c198374982afccfbfe14eefafb9d3054f4b831c3aa6193fa5",
+  "evidence/resolver_cp312.log": "ec9557ab3d449ca989319dd702fd2ddf47ef19eb8074b149fe29b5f9aaf3889a",
+  "evidence/resolver_cp313.log": "f135e0d108be9058ed711d5b856cad086e4f750399ac9bbfafba7f2c06ca3d5c",
+  "evidence/sources.json": "984b7b91593822e5949872fb09fe53b71269f4935b58fdd999fe367bcef31429",
+  "evidence/test_console.log": "5d1c5b18525f63d10304b0602d1f3a286f5401564044dc30e96d8d3a5fd27028",
+  "evidence/test_report.json": "bbe2a2bd57f8cb22b3ef625c1e30074c0f31330324ab9eae600f07b108442dad",
+  "evidence/test_run.log": "e961aa6d59638788dade0bcd95f28eacdc57f4f6bf254f214fb95b1cd51010d5",
+  "evidence/wheel_metadata.json": "f0d4f2d1d8760d9b9e29a39211d96e4133e56f86b3fc6508a4adad0a7ee38a7f",
+  "gci_home_credit_v21_colab.ipynb": "382311bf0420a2bc1daf900eeb2c2c8b18d39668ce691a18ae5710856d250297",
+  "gci_home_credit_v21_colab.zip": "c78f8048a41b15a4b7d8463b6a0c5f05152ab1733e888430ac55db6a2ceea00c",
+  "input/README.md": "a3568bf1414356b99af9edfb93425c0efb462e1644139639e5006386fde4f252",
+  "notion.json": "50a00542c1d37d09ed72baf3f111b5e2735eb3e4f9442241d89e116bbe9294fc",
+  "requirements.txt": "339327d156f2f1e3619de6fec4e5994ed974f2ab2f15e43192a460035ab82db8",
+  "v21_colab.diff": "8c849073ff95c41d05da82a2d348dc23f5b4b6ef83ea841f2cd31be059ceaf21"
+}

@@ -1,0 +1,21 @@
+{
+  "tests_run": 21,
+  "passed": true,
+  "failures": 0,
+  "errors": 0,
+  "training_executed": false,
+  "colab_executed": false,
+  "real_install_executed": false,
+  "upload_drive_tests": "local mocks, not authenticated transfers",
+  "historical_csv_read_only": true,
+  "historical_artifacts_unchanged": {
+    "/Users/eguchi/GCI/entregaveis/v21/gci_home_credit_v21.ipynb": "3c3866074fe4ee9e6f83c036a390dd149e781e85b30eeb188e7580018103d367",
+    "/Users/eguchi/GCI/entregaveis/v21/gci_home_credit_v21.zip": "aa297aaf1db8fb56617ae3522fa27fc13b12cf43b657d2350dc06e4232fe1e74",
+    "/Users/eguchi/GCI/entregaveis/v21/output/submission.csv": "48334efc455a9a28f395e945fb4c04ee847458f439d8b26984e3965766d6a756",
+    "/Users/eguchi/GCI/competition/gci_home_credit_v21.ipynb": "3c3866074fe4ee9e6f83c036a390dd149e781e85b30eeb188e7580018103d367",
+    "/Users/eguchi/GCI/competition/gci_home_credit_v21.zip": "aa297aaf1db8fb56617ae3522fa27fc13b12cf43b657d2350dc06e4232fe1e74",
+    "/Users/eguchi/GCI/competition/input/train.csv": "b8dd5a61771d8eb2821972c1b7d3f2f747cc66471f4d34153036d2d9c458ecf1",
+    "/Users/eguchi/GCI/competition/input/test.csv": "dfb7aeb96e5af3d8616acaaba6b23cec8680845cfd525f7c08de15c6d2d42c65"
+  },
+  "notebook_sha256": "382311bf0420a2bc1daf900eeb2c2c8b18d39668ce691a18ae5710856d250297"
+}
