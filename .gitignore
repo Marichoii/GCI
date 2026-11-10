@@ -24,9 +24,12 @@ __pycache__/
 /competition/output/
 /competition/runs/
 /competition/v[0-9]*/
+!/competition/v21_colab/
+/competition/v21_colab/*
+!/competition/v21_colab/*.py
 /competition/*.log
 
 # Estado local da integração com o Notion.
 /entregaveis/notion.json
 /entregaveis/notion_upload*.json
-/entregaveis/v*/notion.json
+/entregaveis/v*/**/notion.json
