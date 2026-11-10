@@ -35,6 +35,12 @@ Métricas de validação local e scores públicos são registrados separadamente
 
 ## Reproduzir uma submissão
 
+Para executar a v21 no Google Colab CPU, use o
+[notebook adaptado](entregaveis/v21/colab/gci_home_credit_v21_colab.ipynb) e o
+[passo a passo](entregaveis/v21/colab/COMO_RODAR_NO_COLAB.md). O pacote inclui
+testes locais e uma auditoria da preservação da receita original. O treino
+completo no Colab ainda não foi executado nesta entrega.
+
 Os registros de execução usam Python 3.11.15 em macOS ARM64. Cada versão inclui
 seu `requirements.txt`, relatório de execução e limitações conhecidas.
 
